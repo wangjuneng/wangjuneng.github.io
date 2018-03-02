@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Spring Security Core Component | Jim Wang&#39;s individual technology blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="一、SecurityContextHolder,SecurityContext And Authentication ObjectThe most fundamental object is SecurityContextHolder 存储应用程序当前安全上下文的详细信息的地方,其中包括当前使用应用程序主体的详细信息。在默认策略中使用ThreadLocal存储主体信息，其它存储策略如下：12345">
+<meta name="keywords" content="Spring Security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Security Core Component">
+<meta property="og:url" content="https://wangjuneng.github.io/2018/03/01/Spring-Security-Core-Component/index.html">
+<meta property="og:site_name" content="Jim Wang&#39;s individual technology blog">
+<meta property="og:description" content="一、SecurityContextHolder,SecurityContext And Authentication ObjectThe most fundamental object is SecurityContextHolder 存储应用程序当前安全上下文的详细信息的地方,其中包括当前使用应用程序主体的详细信息。在默认策略中使用ThreadLocal存储主体信息，其它存储策略如下：12345">
+<meta property="og:updated_time" content="2018-03-02T14:47:37.931Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spring Security Core Component">
+<meta name="twitter:description" content="一、SecurityContextHolder,SecurityContext And Authentication ObjectThe most fundamental object is SecurityContextHolder 存储应用程序当前安全上下文的详细信息的地方,其中包括当前使用应用程序主体的详细信息。在默认策略中使用ThreadLocal存储主体信息，其它存储策略如下：12345">
+  
+    <link rel="alternate" href="/atom.xml" title="Jim Wang&#39;s individual technology blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Jim Wang&#39;s individual technology blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://wangjuneng.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Spring-Security-Core-Component" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/01/Spring-Security-Core-Component/" class="article-date">
+  <time datetime="2018-03-01T14:47:30.000Z" itemprop="datePublished">2018-03-01</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/java/">Java</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Spring Security Core Component
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="一、SecurityContextHolder-SecurityContext-And-Authentication-Object"><a href="#一、SecurityContextHolder-SecurityContext-And-Authentication-Object" class="headerlink" title="一、SecurityContextHolder,SecurityContext And Authentication Object"></a>一、SecurityContextHolder,SecurityContext And Authentication Object</h2><p>The most fundamental object is <code>SecurityContextHolder</code> 存储应用程序当前安全上下文的详细信息的地方,其中包括当前使用应用程序<code>主体</code>的详细信息。在默认策略中使用<code>ThreadLocal</code>存储<code>主体</code>信息，其它存储策略如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*设置主要信息存储策略是通过System property</span></span><br><span class="line"><span class="comment"> * spring.security.strategy</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> String strategyName = System.getProperty(SYSTEM_PROPERTY);</span><br><span class="line"></span><br><span class="line">GlobalSecurityContextHolderStrategy <span class="comment">//SecurityContextHolder.MODE_GLOBAL</span></span><br><span class="line">InheritableThreadLocalSecurityContextHolderStrategy <span class="comment">//SecurityContextHolder.MODE_INHERITABLETHREADLOCAL</span></span><br><span class="line">ThreadLocalSecurityContextHolderStrategy <span class="comment">//SecurityContextHolder.MODE_THREADLOCAL</span></span><br><span class="line">ReactiveSecurityContextHolder <span class="comment">//jdk 8 </span></span><br><span class="line"><span class="comment">//自定义存储策略 加载方式如下</span></span><br><span class="line">Class&lt;?&gt; clazz = Class.forName(strategyName);</span><br><span class="line">Constructor&lt;?&gt; customStrategy = clazz.getConstructor();</span><br><span class="line">strategy = (SecurityContextHolderStrategy)customStrategy.newInstance();</span><br></pre></td></tr></table></figure></p>
+<h3 id="Obtaining-information-about-the-current-user"><a href="#Obtaining-information-about-the-current-user" class="headerlink" title="Obtaining information about the current user"></a>Obtaining information about the current user</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (principal <span class="keyword">instanceof</span> UserDetails) &#123;</span><br><span class="line">    String username = ((UserDetails)principal).getUsername();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    String username = principal.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="二、The-UserDetailsService"><a href="#二、The-UserDetailsService" class="headerlink" title="二、The UserDetailsService"></a>二、The UserDetailsService</h2><p>从上面代码片段中可以获取到<code>Authentication</code>对象，<code>Principal</code>是一个Object ,大多数情况可以被转换为<code>UserDetails</code>对象，它代表一个<code>主体</code>。但在可扩展的程序中，<code>UserDetails</code>可以看作自己的用户数据库与Security Security需要<code>SecurityContextHolder</code>的适配器，也可对用其它进行扩展，将其强转为扩展实例，可以增加相应的方法（<code>getEmail()</code>…)。<br>可以通过<code>UserDetailsService</code>实现获取<code>UserDetails</code>对象，<code>UserDetailsService</code>接口只有一个方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">UserDetails <span class="title">loadUserByUsername</span><span class="params">(String username)</span> <span class="keyword">throws</span> UsernameNotFoundException</span>;</span><br></pre></td></tr></table></figure></p>
+<pre><code>在认证完成之后`UserDetails`将用来构建`Authentication`对象并存储在`SecurityContextHolder`中，Spring Security 提供简单的实现`JdbcDaoImpl`。
+</code></pre><h2 id="三、GrantedAuthority"><a href="#三、GrantedAuthority" class="headerlink" title="三、GrantedAuthority"></a>三、GrantedAuthority</h2><p><code>Authentication</code>除了<code>主体</code>，另一个重要的方法是<code>getAuthorities()</code>,此方法提供<code>GrantedAuthority</code>列表。</p>
+<h2 id="四、总结"><a href="#四、总结" class="headerlink" title="四、总结"></a>四、总结</h2><ul>
+<li><code>SecurityContextHolder</code> 用来访问<code>SecurityContext</code></li>
+<li><code>SecurityContext</code> 持有身份验证和可能的特定于请求的安全信息</li>
+<li><code>Authentication</code> 代表认证<code>主体</code></li>
+<li><code>GrantedAuthority</code> 代码授予<code>主体</code>的应用程序权限</li>
+<li><code>UserDetails</code>  应用程序的DAO或其他安全数据源提供必要的信息来构建Authentication对象。</li>
+<li><code>UserDetailsService</code> 定义查询<code>UserDetails</code>接口</li>
+</ul>
+<p><a href="https://docs.spring.io/spring-security/site/docs/4.2.4.RELEASE/reference/htmlsingle/#technical-overview" target="_blank" rel="noopener">https://docs.spring.io/spring-security/site/docs/4.2.4.RELEASE/reference/htmlsingle/#technical-overview</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://wangjuneng.github.io/2018/03/01/Spring-Security-Core-Component/" data-id="cjea3v7iv0001jgwrm3wrs7j8" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          ORA-00020: maximum number of processes (1000) exceeded
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/03/01/GIT-常用命令/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">GIT 常用命令</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/db/">Database</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/other/">Others</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">Tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Oracle/">Oracle</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Oracle/" style="font-size: 10px;">Oracle</a> <a href="/tags/Spring-Security/" style="font-size: 20px;">Spring Security</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">February 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/02/Spring-Security-Authentication/">Spring Security Authentication</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/">ORA-00020: maximum number of processes (1000) exceeded</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/01/Spring-Security-Core-Component/">Spring Security Core Component</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/01/GIT-常用命令/">GIT 常用命令</a>
+          </li>
+        
+          <li>
+            <a href="/2018/02/26/使用hexo-github搭建免费个人博客详细教程/">使用hexo+github搭建免费个人博客详细教程</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 Jim Wang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

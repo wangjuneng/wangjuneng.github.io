@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Spring Security Authentication | Jim Wang&#39;s individual technology blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1、What is authentication in Spring SecurityLet’s consider a standard authentication scenario that everyone is familiar with.  A user is prompted to log in with a username and password. The system (suc">
+<meta name="keywords" content="Spring Security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Security Authentication">
+<meta property="og:url" content="https://wangjuneng.github.io/2018/03/02/Spring-Security-Authentication/index.html">
+<meta property="og:site_name" content="Jim Wang&#39;s individual technology blog">
+<meta property="og:description" content="1、What is authentication in Spring SecurityLet’s consider a standard authentication scenario that everyone is familiar with.  A user is prompted to log in with a username and password. The system (suc">
+<meta property="og:updated_time" content="2018-03-02T15:21:10.362Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spring Security Authentication">
+<meta name="twitter:description" content="1、What is authentication in Spring SecurityLet’s consider a standard authentication scenario that everyone is familiar with.  A user is prompted to log in with a username and password. The system (suc">
+  
+    <link rel="alternate" href="/atom.xml" title="Jim Wang&#39;s individual technology blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Jim Wang&#39;s individual technology blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://wangjuneng.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Spring-Security-Authentication" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/02/Spring-Security-Authentication/" class="article-date">
+  <time datetime="2018-03-02T14:46:44.000Z" itemprop="datePublished">2018-03-02</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/java/">Java</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Spring Security Authentication
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1、What-is-authentication-in-Spring-Security"><a href="#1、What-is-authentication-in-Spring-Security" class="headerlink" title="1、What is authentication in Spring Security"></a>1、What is authentication in Spring Security</h2><p>Let’s consider a standard authentication scenario that everyone is familiar with.</p>
+<ol>
+<li>A user is prompted to log in with a username and password.</li>
+<li>The system (successfully) verifies that the password is correct for the username.</li>
+<li>The context information for that user is obtained (their list of roles and so on).</li>
+<li>A security context is established for the user</li>
+<li>The user proceeds, potentially to perform some operation which is potentially protected by an access control mechanism which checks the </li>
+<li>required permissions for the operation against the current security context information.</li>
+</ol>
+<p>The first three items constitute the authentication process so we’ll take a look at how these take place within Spring Security.</p>
+<ol>
+<li>The username and password are obtained and combined into an instance of UsernamePasswordAuthenticationToken (an instance of the Authentication interface, which we saw earlier).</li>
+<li>The token is passed to an instance of AuthenticationManager for validation.</li>
+<li>The AuthenticationManager returns a fully populated Authentication instance on successful authentication.</li>
+<li>The security context is established by calling SecurityContextHolder.getContext().setAuthentication(…​), passing in the returned authentication object.<br>From that point on, the user is considered to be authenticated. Let’s look at some code as an example.<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.security.authentication.*;</span><br><span class="line"><span class="keyword">import</span> org.springframework.security.core.*;</span><br><span class="line"><span class="keyword">import</span> org.springframework.security.core.authority.SimpleGrantedAuthority;</span><br><span class="line"><span class="keyword">import</span> org.springframework.security.core.context.SecurityContextHolder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AuthenticationExample</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> AuthenticationManager am = <span class="keyword">new</span> SampleAuthenticationManager();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        BufferedReader in = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(System.in));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">"Please enter your username:"</span>);</span><br><span class="line">            String name = in.readLine();</span><br><span class="line">            System.out.println(<span class="string">"Please enter your password:"</span>);</span><br><span class="line">            String password = in.readLine();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Authentication request = <span class="keyword">new</span> UsernamePasswordAuthenticationToken(name, password);</span><br><span class="line">                Authentication result = am.authenticate(request);</span><br><span class="line">                SecurityContextHolder.getContext().setAuthentication(result);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">catch</span>(AuthenticationException e) &#123;</span><br><span class="line">                System.out.println(<span class="string">"Authentication failed: "</span> + e.getMessage());</span><br><span class="line">            &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">"Successfully authenticated. Security context contains: "</span> +</span><br><span class="line">                SecurityContextHolder.getContext().getAuthentication());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SampleAuthenticationManager</span> <span class="keyword">implements</span> <span class="title">AuthenticationManager</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> List&lt;GrantedAuthority&gt; AUTHORITIES = <span class="keyword">new</span> ArrayList&lt;GrantedAuthority&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        AUTHORITIES.add(<span class="keyword">new</span> SimpleGrantedAuthority(<span class="string">"ROLE_USER"</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Authentication <span class="title">authenticate</span><span class="params">(Authentication auth)</span> <span class="keyword">throws</span> AuthenticationException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (auth.getName().equals(auth.getCredentials())) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> UsernamePasswordAuthenticationToken(auth.getName(),</span><br><span class="line">            auth.getCredentials(), AUTHORITIES);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> BadCredentialsException(<span class="string">"Bad Credentials"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="2、Setting-the-SecurityContextHolder-Contents-Directly"><a href="#2、Setting-the-SecurityContextHolder-Contents-Directly" class="headerlink" title="2、Setting the SecurityContextHolder Contents Directly"></a>2、Setting the SecurityContextHolder Contents Directly</h2><p>In fact, Spring Security doesn’t mind how you put the <code>Authentication</code> object inside the <code>SecurityContextHolder</code>. The only critical requirement is that the <code>SecurityContextHolder</code> contains an <code>Authentication</code> which represents a principal before the <code>AbstractSecurityInterceptor</code> (which we’ll see more about later) needs to authorize a user operation.</p>
+<h2 id="3、Authentication-in-a-Web-Application"><a href="#3、Authentication-in-a-Web-Application" class="headerlink" title="3、Authentication in a Web Application"></a>3、Authentication in a Web Application</h2><p>&ensp;&ensp; Now let’s explore the situation where you are using Spring Security in a web application (without web.xml security enabled). How is a user authenticated and the security context established?</p>
+<p>Consider a typical web application’s authentication process:</p>
+<ol>
+<li>You visit the home page, and click on a link.</li>
+<li>A request goes to the server, and the server decides that you’ve asked for a protected resource.</li>
+<li>As you’re not presently authenticated, the server sends back a response indicating that you must authenticate. The response will either be an HTTP response code, or a redirect to a particular web page.</li>
+<li>Depending on the authentication mechanism, your browser will either redirect to the specific web page so that you can fill out the form, or the browser will somehow retrieve your identity (via a BASIC authentication dialogue box, a cookie, a X.509 certificate etc.).</li>
+<li>The browser will send back a response to the server. This will either be an HTTP POST containing the contents of the form that you filled out, or an HTTP header containing your authentication details.</li>
+<li>Next the server will decide whether or not the presented credentials are valid. If they’re valid, the next step will happen. If they’re invalid, usually your browser will be asked to try again (so you return to step two above).</li>
+<li>The original request that you made to cause the authentication process will be retried. Hopefully you’ve authenticated with sufficient granted authorities to access the protected resource. If you have sufficient access, the request will be successful. Otherwise, you’ll receive back an HTTP error code 403, which means “forbidden”.</li>
+</ol>
+<p>Spring Security has distinct classes responsible for most of the steps described above. The main participants (in the order that they are used) are the <code>ExceptionTranslationFilter</code>, an <code>AuthenticationEntryPoint</code> and an “authentication mechanism”, which is responsible for calling the <code>AuthenticationManager</code> which we saw in the previous section.</p>
+<h2 id="4、ExceptionTranslationFilter"><a href="#4、ExceptionTranslationFilter" class="headerlink" title="4、ExceptionTranslationFilter"></a>4、ExceptionTranslationFilter</h2><p><code>ExceptionTranslationFilter</code> is a Spring Security filter that has responsibility for detecting any Spring Security exceptions that are thrown. Such exceptions will generally be thrown by an <code>AbstractSecurityInterceptor</code>, which is the main provider of authorization services. </p>
+<h2 id="5、AuthenticationEntryPoint"><a href="#5、AuthenticationEntryPoint" class="headerlink" title="5、AuthenticationEntryPoint"></a>5、AuthenticationEntryPoint</h2><p>The <code>AuthenticationEntryPoint</code> is responsible for step three in the above list. As you can imagine, each web application will have a default authentication strategy (well, this can be configured like nearly everything else in Spring Security, but let’s keep it simple for now). Each major authentication system will have its own <code>AuthenticationEntryPoint</code> implementation, which typically performs one of the actions described in step 3.</p>
+<h2 id="6、-Authentication-Mechanism"><a href="#6、-Authentication-Mechanism" class="headerlink" title="6、 Authentication Mechanism"></a>6、 Authentication Mechanism</h2><p>&ensp;&ensp; Once your browser submits your authentication credentials (either as an HTTP form post or HTTP header) there needs to be something on the server that “collects” these authentication details. By now we’re at step six in the above list. In Spring Security we have a special name for the function of collecting authentication details from a user agent (usually a web browser), referring to it as the “authentication mechanism”. Examples are form-base login and Basic authentication. Once the authentication details have been collected from the user agent, an Authentication “request” object is built and then presented to the AuthenticationManager.</p>
+<p>After the authentication mechanism receives back the fully-populated Authentication object, it will deem the request valid, put the Authentication into the SecurityContextHolder, and cause the original request to be retried (step seven above). If, on the other hand, the AuthenticationManager rejected the request, the authentication mechanism will ask the user agent to retry (step two above).</p>
+<h2 id="7、Storing-the-SecurityContext-between-requests"><a href="#7、Storing-the-SecurityContext-between-requests" class="headerlink" title="7、Storing the SecurityContext between requests"></a>7、Storing the SecurityContext between requests</h2><p>Depending on the type of application, there may need to be a strategy in place to store the security context between user operations. In a typical web application, a user logs in once and is subsequently identified by their session Id. The server caches the principal information for the duration session. In Spring Security, the responsibility for storing the SecurityContext between requests falls to the <code>SecurityContextPersistenceFilter</code>, which by default stores the context as an HttpSession attribute between HTTP requests. It restores the context to the <code>SecurityContextHolder</code> for each request and, crucially, clears the <code>SecurityContextHolder</code> when the request completes. You shouldn’t interact directly with the HttpSession for security purposes. There is simply no justification for doing so - always use the SecurityContextHolder instead.</p>
+<p>Many other types of application (for example, a stateless RESTful web service) do not use HTTP sessions and will re-authenticate on every request. However, it is still important that the <code>SecurityContextPersistenceFilter</code> is included in the chain to make sure that the <code>SecurityContextHolder</code> is cleared after each request.</p>
+<p><code>SecurityContextRepository</code> 定义请求与SecurityContext关联策略 eg:HttpSession<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Session exists, so try to obtain a context from it. springSecurityContextKey==SPRING_SECURITY_CONTEXT</span></span><br><span class="line">Object contextFromSession = httpSession.getAttribute(springSecurityContextKey);</span><br><span class="line"><span class="keyword">if</span> (contextFromSession == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (debug) &#123;</span><br><span class="line">        logger.debug(<span class="string">"HttpSession returned null object for SPRING_SECURITY_CONTEXT"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// we no have the security context object from the session</span></span><br><span class="line"><span class="keyword">if</span> (!(contextFromSession <span class="keyword">instanceof</span> SecurityContext)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (logger.isWarnEnabled()) &#123;</span><br><span class="line">        logger.warn(springSecurityContextKey + <span class="string">" did not contain a SecurityContext but contained: '"</span></span><br><span class="line">            + contextFromSession + <span class="string">"'; are you improperly modifying the HttpSession directly "</span></span><br><span class="line">            + <span class="string">"(you should always use SecurityContextHolder) or using the HttpSession attribute "</span></span><br><span class="line">            + <span class="string">"reserved for this class?"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (debug) &#123;</span><br><span class="line">    logger.debug(<span class="string">"Obtained a valid SecurityContext from "</span> + springSecurityContextKey + <span class="string">": '"</span></span><br><span class="line">        + contextFromSession + <span class="string">"'"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Everything OK. The only non-null return from this method.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> (SecurityContext) contextFromSession;</span><br></pre></td></tr></table></figure></p>
+<p>对于其它A stateless RESTful web service 不可能使用Http session ,就会用其它重新认证策略（jwt)</p>
+<h2 id="8、Access-Control-Authorization-in-Spring-Security"><a href="#8、Access-Control-Authorization-in-Spring-Security" class="headerlink" title="8、Access-Control (Authorization) in Spring Security"></a>8、Access-Control (Authorization) in Spring Security</h2><p>在Spring Security中负责进行访问控制决策的主要接口是AccessDecisionManager.<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Resolves an access control decision for the passed parameters.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> authentication the caller invoking the method (not null)</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> object the secured object being called</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> configAttributes the configuration attributes associated with the secured object being invoked</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> AccessDeniedException if access is denied as the authentication does not hold a required authority or ACL</span></span><br><span class="line"><span class="comment"> *             privilege</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> InsufficientAuthenticationException if access is denied as the authentication does not provide a</span></span><br><span class="line"><span class="comment"> *             sufficient level of trust</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">decide</span><span class="params">(Authentication authentication, Object object, Collection&lt;ConfigAttribute&gt; configAttributes)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> AccessDeniedException, InsufficientAuthenticationException</span>;</span><br></pre></td></tr></table></figure></p>
+<h3 id="8-1、-Security-and-AOP-Advice"><a href="#8-1、-Security-and-AOP-Advice" class="headerlink" title="8.1、 Security and AOP Advice"></a>8.1、 Security and AOP Advice</h3><p>You can elect to perform method authorization using <code>AspectJ</code> or <code>Spring AOP</code>, or you can elect to perform web request authorization using <code>filters</code>. You can use zero, one, two or three of these approaches together. The mainstream usage pattern is to perform some web request authorization, coupled with some Spring AOP method invocation authorization on the services layer.</p>
+<h3 id="8-2、Secure-Objects-and-the-AbstractSecurityInterceptor"><a href="#8-2、Secure-Objects-and-the-AbstractSecurityInterceptor" class="headerlink" title="8.2、Secure Objects and the AbstractSecurityInterceptor"></a>8.2、Secure Objects and the AbstractSecurityInterceptor</h3><p>Each supported secure object type has its own interceptor class, which is a subclass of <code>AbstractSecurityInterceptor</code>. Importantly, by the time the <code>AbstractSecurityInterceptor</code> is called, the <code>SecurityContextHolder</code> will contain a valid Authentication if the <code>principal</code> has been authenticated.</p>
+<p><code>AbstractSecurityInterceptor</code> provides a consistent workflow for handling secure object requests, typically:</p>
+<ol>
+<li>Look up the “configuration attributes” associated with the present request</li>
+<li>Submitting the secure object, current Authentication and configuration attributes to the AccessDecisionManager for an authorization decision</li>
+<li>Optionally change the Authentication under which the invocation takes place</li>
+<li>Allow the secure object invocation to proceed (assuming access was granted)</li>
+<li>Call the AfterInvocationManager if configured, once the invocation has returned. If the invocation raised an exception, the AfterInvocationManager will not be invoked.<h3 id="8-3、What-are-Configuration-Attributes"><a href="#8-3、What-are-Configuration-Attributes" class="headerlink" title="8.3、What are Configuration Attributes"></a>8.3、What are Configuration Attributes</h3>Configuration Attributes 简单来说就是访问对象所需要的权限，通过<code>SecurityMetadataSource</code>进行加载<h3 id="8-4、RunAsManager"><a href="#8-4、RunAsManager" class="headerlink" title="8.4、RunAsManager"></a>8.4、RunAsManager</h3>Assuming <code>AccessDecisionManager</code> decides to allow the request, the <code>AbstractSecurityInterceptor</code> will normally just proceed with the request. Having said that, on rare occasions users may want to replace the <code>Authentication</code> inside the <code>SecurityContext</code> with a different <code>Authentication</code>, which is handled by the <code>AccessDecisionManager</code> calling a <code>RunAsManager</code>. This might be useful in reasonably unusual situations, such as if a services layer method needs to call a remote system and present a different identity. Because Spring Security automatically propagates security identity from one server to another (assuming you’re using a properly-configured RMI or HttpInvoker remoting protocol client), this may be useful.<h3 id="8-5、AfterInvocationManager"><a href="#8-5、AfterInvocationManager" class="headerlink" title="8.5、AfterInvocationManager"></a>8.5、AfterInvocationManager</h3>Following the secure object invocation proceeding and then returning - which may mean a method invocation completing or a filter chain proceeding - the AbstractSecurityInterceptor gets one final chance to handle the invocation. At this stage the AbstractSecurityInterceptor is interested in possibly modifying the return object. We might want this to happen because an authorization decision couldn’t be made “on the way in” to a secure object invocation. Being highly pluggable, AbstractSecurityInterceptor will pass control to an AfterInvocationManager to actually modify the object if needed. This class can even entirely replace the object, or throw an exception, or not change it in any way as it chooses. The after-invocation checks will only be executed if the invocation is successful. If an exception occurs, the additional checks will be skipped.<h3 id="8-6、Extending-the-Secure-Object-Model"><a href="#8-6、Extending-the-Secure-Object-Model" class="headerlink" title="8.6、Extending the Secure Object Model"></a>8.6、Extending the Secure Object Model</h3>Only developers contemplating an entirely new way of intercepting and authorizing requests would need to use secure objects directly. For example, it would be possible to build a new secure object to secure calls to a messaging system. Anything that requires security and also provides a way of intercepting a call (like the AOP around advice semantics) is capable of being made into a secure object. Having said that, most Spring applications will simply use the three currently supported secure object types (AOP Alliance MethodInvocation, AspectJ JoinPoint and web request FilterInvocation) with complete transparency.<h3 id="8-7、Localization"><a href="#8-7、Localization" class="headerlink" title="8.7、Localization"></a>8.7、Localization</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"messageSource"</span></span></span><br><span class="line"><span class="tag">	<span class="attr">class</span>=<span class="string">"org.springframework.context.support.ReloadableResourceBundleMessageSource"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"basename"</span> <span class="attr">value</span>=<span class="string">"classpath:org/springframework/security/messages"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>Spring Security relies on Spring’s localization support in order to actually lookup the appropriate message. In order for this to work, you have to make sure that the locale from the incoming request is stored in Spring’s <code>org.springframework.context.i18n.LocaleContextHolder</code>. Spring MVC’s <code>DispatcherServlet</code> does this for your application automatically, but since Spring Security’s filters are invoked before this, the <code>LocaleContextHolder</code> needs to be set up to contain the correct <code>Locale</code> before the filters are called. You can either do this in a filter yourself (which must come before the Spring Security filters in <code>web.xml</code>) or you can use Spring’s RequestContextFilter. Please refer to the Spring Framework documentation for further details on using localization with Spring.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://wangjuneng.github.io/2018/03/02/Spring-Security-Authentication/" data-id="cjea3v7j20005jgwruym139hh" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">ORA-00020: maximum number of processes (1000) exceeded</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/db/">Database</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/other/">Others</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">Tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Oracle/">Oracle</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Oracle/" style="font-size: 10px;">Oracle</a> <a href="/tags/Spring-Security/" style="font-size: 20px;">Spring Security</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">February 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/02/Spring-Security-Authentication/">Spring Security Authentication</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/">ORA-00020: maximum number of processes (1000) exceeded</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/01/Spring-Security-Core-Component/">Spring Security Core Component</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/01/GIT-常用命令/">GIT 常用命令</a>
+          </li>
+        
+          <li>
+            <a href="/2018/02/26/使用hexo-github搭建免费个人博客详细教程/">使用hexo+github搭建免费个人博客详细教程</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 Jim Wang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

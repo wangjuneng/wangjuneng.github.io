@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ORA-00020: maximum number of processes (1000) exceeded | Jim Wang&#39;s individual technology blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="ORA-00020: maximum number of processes (1000) exceeded Alert log: ORA-00020: maximum number of processes (1000) exceeded ORA-20 errors will not be written to the alert log for the next minute. Please">
+<meta name="keywords" content="Oracle">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ORA-00020: maximum number of processes (1000) exceeded">
+<meta property="og:url" content="https://wangjuneng.github.io/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/index.html">
+<meta property="og:site_name" content="Jim Wang&#39;s individual technology blog">
+<meta property="og:description" content="ORA-00020: maximum number of processes (1000) exceeded Alert log: ORA-00020: maximum number of processes (1000) exceeded ORA-20 errors will not be written to the alert log for the next minute. Please">
+<meta property="og:updated_time" content="2018-03-02T05:09:32.444Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ORA-00020: maximum number of processes (1000) exceeded">
+<meta name="twitter:description" content="ORA-00020: maximum number of processes (1000) exceeded Alert log: ORA-00020: maximum number of processes (1000) exceeded ORA-20 errors will not be written to the alert log for the next minute. Please">
+  
+    <link rel="alternate" href="/atom.xml" title="Jim Wang&#39;s individual technology blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Jim Wang&#39;s individual technology blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://wangjuneng.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-ORA-00020-maximum-number-of-processes-1000-exceeded" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/" class="article-date">
+  <time datetime="2018-03-02T05:01:10.000Z" itemprop="datePublished">2018-03-02</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/db/">Database</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ORA-00020: maximum number of processes (1000) exceeded
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>ORA-00020: maximum number of processes (1000) exceeded</p>
+<p>Alert log:</p>
+<p>ORA-00020: maximum number of processes (1000) exceeded<br> ORA-20 errors will not be written to the alert log for<br> the next minute. Please look at trace files to see all<br> the ORA-20 errors.<br>Mon Dec 29 22:48:29 2014<br>ORA-00020: maximum number of processes (1000) exceeded<br> ORA-20 errors will not be written to the alert log for<br> the next minute. Please look at trace files to see all<br> the ORA-20 errors.<br>Mon Dec 29 22:52:32 2014<br>ORA-00020: maximum number of processes (1000) exceeded<br> ORA-20 errors will not be written to the alert log for<br> the next minute. Please look at trace files to see all<br> the ORA-20 errors.</p>
+<p>Solution:<br>If you cannot connect to the sqlplus traditinal method use prelim option. This is one of the bypass option to connect the sqlplus.</p>
+<p>sqlplus -prelim is a backdoor method to connect the sqlplus where no othere method not supporting to create new session. It will connect only SGA and it will not create any new session.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ sqlplus -prelim</span><br><span class="line">oradb@CGABCDRADBOP01:/oracle_home/app $ sqlplus -prelim</span><br><span class="line">SQL*Plus: Release 11.2.0.4.0 Production on Tue Dec 30 13:04:12 2014</span><br><span class="line">Copyright (c) 1982, 2013, Oracle.  All rights reserved.</span><br><span class="line">Enter user-name: / as sysdba</span><br><span class="line">SQL&gt;</span><br><span class="line">Bounce the DB and  you can increase the processes with below options.</span><br><span class="line">processes=x</span><br><span class="line">sessions=x*1.1+5</span><br><span class="line">transactions=sessions*1.1</span><br><span class="line">sql&gt; show parameter sessions</span><br><span class="line">sql&gt; show parameter processes</span><br><span class="line">sql&gt; show parameter transactions</span><br><span class="line">sql&gt; alter system <span class="built_in">set</span> processes=500 SCOPE=SPFILE; </span><br><span class="line">sql&gt; alter system <span class="built_in">set</span> sessions=555 SCOPE=SPFILE; </span><br><span class="line">sql&gt; alter system <span class="built_in">set</span> transactions=610 SCOPE=SPFILE;</span><br></pre></td></tr></table></figure></p>
+<p>and Restart the database.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sql&gt;alter system <span class="built_in">set</span> open_cursors=1500 scope=both;</span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> processes=3000 scope=spfile;</span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> job_queue_processes=4 scope=both;</span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> undo_retention=10800 scope=both;</span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> max_shared_servers=50 scope=both;</span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> db_files=2000 scope=spfile; </span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> sessions=3305 SCOPE=SPFILE;  </span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> transactions=3635 SCOPE=SPFILE;</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li>After you connect with <code>-prelim</code> mode, it’s also possible to use oradebug commands to examine the situation. </li>
+<li>It will not create new session and connecting only SGA. So you can performance all the oradebug utilities to analyse the issue. </li>
+</ol>
+<h3 id="prelim"><a href="#prelim" class="headerlink" title="-prelim"></a>-prelim</h3><p>Answer:  If you cannot connect, you have two choices, either wait (impacting the end users) or immediately bounce the instance. </p>
+<p>1 - Killing the background processes and removing the RAM segments. See killing oracle instance tips.</p>
+<p>2 - Using the -prelim SQL<em>Plus option to bypass creation of a new SQL</em>Plus session.</p>
+<p>The -prelim option of the SQL*Plus connect string was introduced in 10g to bypasses the creation of a new session in cases where the database is hung and not accepting traditional sqlplus connections:.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$sqlplus</span> /nolog</span><br><span class="line">SQL&gt; <span class="built_in">set</span> _prelim on</span><br><span class="line">SQL&gt; conn / as sysdba</span><br><span class="line">Prelim connection established</span><br><span class="line">SQL&gt; shutdown abort</span><br></pre></td></tr></table></figure></p>
+<p>Here is how to quickly generate a hang analysis immediately prior to re-starting a hung production instance:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">/u01/app/oracle/bin&gt;sqlplus system/mypass -prelim /nolog </span><br><span class="line">SQL*Plus: Release 10.2.0.2.0 - Production   </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug setmypid </span><br><span class="line">Statement processed.   </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug hanganalyze 12 </span><br><span class="line">Hang Analysis <span class="keyword">in</span> /u01/app/oracle/admin/mysid/udump/mysid_ora_1234.trc</span><br></pre></td></tr></table></figure></p>
+<p>You can also use the -prelim argument to capture Automated Session  History (ASH) data for a hung database:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">/u01/app/oracle/bin&gt;sqlplus system/mypass -prelim /nolog </span><br><span class="line">SQL*Plus: Release 10.2.0.2.0 - Production   </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug setmypid </span><br><span class="line">Statement processed.   </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug dump ashdump 10 </span><br><span class="line">Statement processed.   </span><br><span class="line"></span><br><span class="line">&gt;alter session <span class="built_in">set</span> events <span class="string">'immediate trace name ashdump level 10'</span>;</span><br><span class="line">-</span><br><span class="line"><span class="variable">$sqlplus</span> -prelim /nolog </span><br><span class="line"></span><br><span class="line">SQL&gt; connect / as sysdba </span><br><span class="line">Prelim connection established</span><br><span class="line"> </span><br><span class="line">SQL&gt; oradebug setmypid </span><br><span class="line">Statement processed. </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug hanganalyze 12 </span><br><span class="line">Hang Analysis <span class="keyword">in</span> C:\oracle\admin\orcl\udump\orcl_ora_5564.trc </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug dump systemstate 10 </span><br><span class="line">Statement processed. </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug tracefile_name C:\oracle\admin\orcl\udump\orcl_ora_5598.trc</span><br></pre></td></tr></table></figure></p>
+<p><a href="http://www.dba-oracle.com/t_connecting_hung_instance_using_prelim_option.htm" target="_blank" rel="noopener">http://www.dba-oracle.com/t_connecting_hung_instance_using_prelim_option.htm</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://wangjuneng.github.io/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/" data-id="cjea3v7j7000ajgwr4veslerh" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/03/02/Spring-Security-Authentication/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Spring Security Authentication
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/03/01/Spring-Security-Core-Component/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Spring Security Core Component</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/db/">Database</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/other/">Others</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">Tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Oracle/">Oracle</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Oracle/" style="font-size: 10px;">Oracle</a> <a href="/tags/Spring-Security/" style="font-size: 20px;">Spring Security</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">February 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/02/Spring-Security-Authentication/">Spring Security Authentication</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/">ORA-00020: maximum number of processes (1000) exceeded</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/01/Spring-Security-Core-Component/">Spring Security Core Component</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/01/GIT-常用命令/">GIT 常用命令</a>
+          </li>
+        
+          <li>
+            <a href="/2018/02/26/使用hexo-github搭建免费个人博客详细教程/">使用hexo+github搭建免费个人博客详细教程</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 Jim Wang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

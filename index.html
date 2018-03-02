@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Jim Wang&#39;s individual technology blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Jim Wang&#39;s individual technology blog">
+<meta property="og:url" content="https://wangjuneng.github.io/index.html">
+<meta property="og:site_name" content="Jim Wang&#39;s individual technology blog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Jim Wang&#39;s individual technology blog">
+  
+    <link rel="alternate" href="/atom.xml" title="Jim Wang&#39;s individual technology blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Jim Wang&#39;s individual technology blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://wangjuneng.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-Spring-Security-Authentication" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/02/Spring-Security-Authentication/" class="article-date">
+  <time datetime="2018-03-02T14:46:44.000Z" itemprop="datePublished">2018-03-02</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/java/">Java</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/02/Spring-Security-Authentication/">Spring Security Authentication</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1、What-is-authentication-in-Spring-Security"><a href="#1、What-is-authentication-in-Spring-Security" class="headerlink" title="1、What is authentication in Spring Security"></a>1、What is authentication in Spring Security</h2><p>Let’s consider a standard authentication scenario that everyone is familiar with.</p>
+<ol>
+<li>A user is prompted to log in with a username and password.</li>
+<li>The system (successfully) verifies that the password is correct for the username.</li>
+<li>The context information for that user is obtained (their list of roles and so on).</li>
+<li>A security context is established for the user</li>
+<li>The user proceeds, potentially to perform some operation which is potentially protected by an access control mechanism which checks the </li>
+<li>required permissions for the operation against the current security context information.</li>
+</ol>
+<p>The first three items constitute the authentication process so we’ll take a look at how these take place within Spring Security.</p>
+<ol>
+<li>The username and password are obtained and combined into an instance of UsernamePasswordAuthenticationToken (an instance of the Authentication interface, which we saw earlier).</li>
+<li>The token is passed to an instance of AuthenticationManager for validation.</li>
+<li>The AuthenticationManager returns a fully populated Authentication instance on successful authentication.</li>
+<li>The security context is established by calling SecurityContextHolder.getContext().setAuthentication(…​), passing in the returned authentication object.<br>From that point on, the user is considered to be authenticated. Let’s look at some code as an example.<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.security.authentication.*;</span><br><span class="line"><span class="keyword">import</span> org.springframework.security.core.*;</span><br><span class="line"><span class="keyword">import</span> org.springframework.security.core.authority.SimpleGrantedAuthority;</span><br><span class="line"><span class="keyword">import</span> org.springframework.security.core.context.SecurityContextHolder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AuthenticationExample</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> AuthenticationManager am = <span class="keyword">new</span> SampleAuthenticationManager();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        BufferedReader in = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(System.in));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">"Please enter your username:"</span>);</span><br><span class="line">            String name = in.readLine();</span><br><span class="line">            System.out.println(<span class="string">"Please enter your password:"</span>);</span><br><span class="line">            String password = in.readLine();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Authentication request = <span class="keyword">new</span> UsernamePasswordAuthenticationToken(name, password);</span><br><span class="line">                Authentication result = am.authenticate(request);</span><br><span class="line">                SecurityContextHolder.getContext().setAuthentication(result);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">catch</span>(AuthenticationException e) &#123;</span><br><span class="line">                System.out.println(<span class="string">"Authentication failed: "</span> + e.getMessage());</span><br><span class="line">            &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">"Successfully authenticated. Security context contains: "</span> +</span><br><span class="line">                SecurityContextHolder.getContext().getAuthentication());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SampleAuthenticationManager</span> <span class="keyword">implements</span> <span class="title">AuthenticationManager</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> List&lt;GrantedAuthority&gt; AUTHORITIES = <span class="keyword">new</span> ArrayList&lt;GrantedAuthority&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        AUTHORITIES.add(<span class="keyword">new</span> SimpleGrantedAuthority(<span class="string">"ROLE_USER"</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Authentication <span class="title">authenticate</span><span class="params">(Authentication auth)</span> <span class="keyword">throws</span> AuthenticationException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (auth.getName().equals(auth.getCredentials())) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> UsernamePasswordAuthenticationToken(auth.getName(),</span><br><span class="line">            auth.getCredentials(), AUTHORITIES);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> BadCredentialsException(<span class="string">"Bad Credentials"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="2、Setting-the-SecurityContextHolder-Contents-Directly"><a href="#2、Setting-the-SecurityContextHolder-Contents-Directly" class="headerlink" title="2、Setting the SecurityContextHolder Contents Directly"></a>2、Setting the SecurityContextHolder Contents Directly</h2><p>In fact, Spring Security doesn’t mind how you put the <code>Authentication</code> object inside the <code>SecurityContextHolder</code>. The only critical requirement is that the <code>SecurityContextHolder</code> contains an <code>Authentication</code> which represents a principal before the <code>AbstractSecurityInterceptor</code> (which we’ll see more about later) needs to authorize a user operation.</p>
+<h2 id="3、Authentication-in-a-Web-Application"><a href="#3、Authentication-in-a-Web-Application" class="headerlink" title="3、Authentication in a Web Application"></a>3、Authentication in a Web Application</h2><p>&ensp;&ensp; Now let’s explore the situation where you are using Spring Security in a web application (without web.xml security enabled). How is a user authenticated and the security context established?</p>
+<p>Consider a typical web application’s authentication process:</p>
+<ol>
+<li>You visit the home page, and click on a link.</li>
+<li>A request goes to the server, and the server decides that you’ve asked for a protected resource.</li>
+<li>As you’re not presently authenticated, the server sends back a response indicating that you must authenticate. The response will either be an HTTP response code, or a redirect to a particular web page.</li>
+<li>Depending on the authentication mechanism, your browser will either redirect to the specific web page so that you can fill out the form, or the browser will somehow retrieve your identity (via a BASIC authentication dialogue box, a cookie, a X.509 certificate etc.).</li>
+<li>The browser will send back a response to the server. This will either be an HTTP POST containing the contents of the form that you filled out, or an HTTP header containing your authentication details.</li>
+<li>Next the server will decide whether or not the presented credentials are valid. If they’re valid, the next step will happen. If they’re invalid, usually your browser will be asked to try again (so you return to step two above).</li>
+<li>The original request that you made to cause the authentication process will be retried. Hopefully you’ve authenticated with sufficient granted authorities to access the protected resource. If you have sufficient access, the request will be successful. Otherwise, you’ll receive back an HTTP error code 403, which means “forbidden”.</li>
+</ol>
+<p>Spring Security has distinct classes responsible for most of the steps described above. The main participants (in the order that they are used) are the <code>ExceptionTranslationFilter</code>, an <code>AuthenticationEntryPoint</code> and an “authentication mechanism”, which is responsible for calling the <code>AuthenticationManager</code> which we saw in the previous section.</p>
+<h2 id="4、ExceptionTranslationFilter"><a href="#4、ExceptionTranslationFilter" class="headerlink" title="4、ExceptionTranslationFilter"></a>4、ExceptionTranslationFilter</h2><p><code>ExceptionTranslationFilter</code> is a Spring Security filter that has responsibility for detecting any Spring Security exceptions that are thrown. Such exceptions will generally be thrown by an <code>AbstractSecurityInterceptor</code>, which is the main provider of authorization services. </p>
+<h2 id="5、AuthenticationEntryPoint"><a href="#5、AuthenticationEntryPoint" class="headerlink" title="5、AuthenticationEntryPoint"></a>5、AuthenticationEntryPoint</h2><p>The <code>AuthenticationEntryPoint</code> is responsible for step three in the above list. As you can imagine, each web application will have a default authentication strategy (well, this can be configured like nearly everything else in Spring Security, but let’s keep it simple for now). Each major authentication system will have its own <code>AuthenticationEntryPoint</code> implementation, which typically performs one of the actions described in step 3.</p>
+<h2 id="6、-Authentication-Mechanism"><a href="#6、-Authentication-Mechanism" class="headerlink" title="6、 Authentication Mechanism"></a>6、 Authentication Mechanism</h2><p>&ensp;&ensp; Once your browser submits your authentication credentials (either as an HTTP form post or HTTP header) there needs to be something on the server that “collects” these authentication details. By now we’re at step six in the above list. In Spring Security we have a special name for the function of collecting authentication details from a user agent (usually a web browser), referring to it as the “authentication mechanism”. Examples are form-base login and Basic authentication. Once the authentication details have been collected from the user agent, an Authentication “request” object is built and then presented to the AuthenticationManager.</p>
+<p>After the authentication mechanism receives back the fully-populated Authentication object, it will deem the request valid, put the Authentication into the SecurityContextHolder, and cause the original request to be retried (step seven above). If, on the other hand, the AuthenticationManager rejected the request, the authentication mechanism will ask the user agent to retry (step two above).</p>
+<h2 id="7、Storing-the-SecurityContext-between-requests"><a href="#7、Storing-the-SecurityContext-between-requests" class="headerlink" title="7、Storing the SecurityContext between requests"></a>7、Storing the SecurityContext between requests</h2><p>Depending on the type of application, there may need to be a strategy in place to store the security context between user operations. In a typical web application, a user logs in once and is subsequently identified by their session Id. The server caches the principal information for the duration session. In Spring Security, the responsibility for storing the SecurityContext between requests falls to the <code>SecurityContextPersistenceFilter</code>, which by default stores the context as an HttpSession attribute between HTTP requests. It restores the context to the <code>SecurityContextHolder</code> for each request and, crucially, clears the <code>SecurityContextHolder</code> when the request completes. You shouldn’t interact directly with the HttpSession for security purposes. There is simply no justification for doing so - always use the SecurityContextHolder instead.</p>
+<p>Many other types of application (for example, a stateless RESTful web service) do not use HTTP sessions and will re-authenticate on every request. However, it is still important that the <code>SecurityContextPersistenceFilter</code> is included in the chain to make sure that the <code>SecurityContextHolder</code> is cleared after each request.</p>
+<p><code>SecurityContextRepository</code> 定义请求与SecurityContext关联策略 eg:HttpSession<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Session exists, so try to obtain a context from it. springSecurityContextKey==SPRING_SECURITY_CONTEXT</span></span><br><span class="line">Object contextFromSession = httpSession.getAttribute(springSecurityContextKey);</span><br><span class="line"><span class="keyword">if</span> (contextFromSession == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (debug) &#123;</span><br><span class="line">        logger.debug(<span class="string">"HttpSession returned null object for SPRING_SECURITY_CONTEXT"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// we no have the security context object from the session</span></span><br><span class="line"><span class="keyword">if</span> (!(contextFromSession <span class="keyword">instanceof</span> SecurityContext)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (logger.isWarnEnabled()) &#123;</span><br><span class="line">        logger.warn(springSecurityContextKey + <span class="string">" did not contain a SecurityContext but contained: '"</span></span><br><span class="line">            + contextFromSession + <span class="string">"'; are you improperly modifying the HttpSession directly "</span></span><br><span class="line">            + <span class="string">"(you should always use SecurityContextHolder) or using the HttpSession attribute "</span></span><br><span class="line">            + <span class="string">"reserved for this class?"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (debug) &#123;</span><br><span class="line">    logger.debug(<span class="string">"Obtained a valid SecurityContext from "</span> + springSecurityContextKey + <span class="string">": '"</span></span><br><span class="line">        + contextFromSession + <span class="string">"'"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Everything OK. The only non-null return from this method.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> (SecurityContext) contextFromSession;</span><br></pre></td></tr></table></figure></p>
+<p>对于其它A stateless RESTful web service 不可能使用Http session ,就会用其它重新认证策略（jwt)</p>
+<h2 id="8、Access-Control-Authorization-in-Spring-Security"><a href="#8、Access-Control-Authorization-in-Spring-Security" class="headerlink" title="8、Access-Control (Authorization) in Spring Security"></a>8、Access-Control (Authorization) in Spring Security</h2><p>在Spring Security中负责进行访问控制决策的主要接口是AccessDecisionManager.<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Resolves an access control decision for the passed parameters.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> authentication the caller invoking the method (not null)</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> object the secured object being called</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> configAttributes the configuration attributes associated with the secured object being invoked</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> AccessDeniedException if access is denied as the authentication does not hold a required authority or ACL</span></span><br><span class="line"><span class="comment"> *             privilege</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> InsufficientAuthenticationException if access is denied as the authentication does not provide a</span></span><br><span class="line"><span class="comment"> *             sufficient level of trust</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">decide</span><span class="params">(Authentication authentication, Object object, Collection&lt;ConfigAttribute&gt; configAttributes)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> AccessDeniedException, InsufficientAuthenticationException</span>;</span><br></pre></td></tr></table></figure></p>
+<h3 id="8-1、-Security-and-AOP-Advice"><a href="#8-1、-Security-and-AOP-Advice" class="headerlink" title="8.1、 Security and AOP Advice"></a>8.1、 Security and AOP Advice</h3><p>You can elect to perform method authorization using <code>AspectJ</code> or <code>Spring AOP</code>, or you can elect to perform web request authorization using <code>filters</code>. You can use zero, one, two or three of these approaches together. The mainstream usage pattern is to perform some web request authorization, coupled with some Spring AOP method invocation authorization on the services layer.</p>
+<h3 id="8-2、Secure-Objects-and-the-AbstractSecurityInterceptor"><a href="#8-2、Secure-Objects-and-the-AbstractSecurityInterceptor" class="headerlink" title="8.2、Secure Objects and the AbstractSecurityInterceptor"></a>8.2、Secure Objects and the AbstractSecurityInterceptor</h3><p>Each supported secure object type has its own interceptor class, which is a subclass of <code>AbstractSecurityInterceptor</code>. Importantly, by the time the <code>AbstractSecurityInterceptor</code> is called, the <code>SecurityContextHolder</code> will contain a valid Authentication if the <code>principal</code> has been authenticated.</p>
+<p><code>AbstractSecurityInterceptor</code> provides a consistent workflow for handling secure object requests, typically:</p>
+<ol>
+<li>Look up the “configuration attributes” associated with the present request</li>
+<li>Submitting the secure object, current Authentication and configuration attributes to the AccessDecisionManager for an authorization decision</li>
+<li>Optionally change the Authentication under which the invocation takes place</li>
+<li>Allow the secure object invocation to proceed (assuming access was granted)</li>
+<li>Call the AfterInvocationManager if configured, once the invocation has returned. If the invocation raised an exception, the AfterInvocationManager will not be invoked.<h3 id="8-3、What-are-Configuration-Attributes"><a href="#8-3、What-are-Configuration-Attributes" class="headerlink" title="8.3、What are Configuration Attributes"></a>8.3、What are Configuration Attributes</h3>Configuration Attributes 简单来说就是访问对象所需要的权限，通过<code>SecurityMetadataSource</code>进行加载<h3 id="8-4、RunAsManager"><a href="#8-4、RunAsManager" class="headerlink" title="8.4、RunAsManager"></a>8.4、RunAsManager</h3>Assuming <code>AccessDecisionManager</code> decides to allow the request, the <code>AbstractSecurityInterceptor</code> will normally just proceed with the request. Having said that, on rare occasions users may want to replace the <code>Authentication</code> inside the <code>SecurityContext</code> with a different <code>Authentication</code>, which is handled by the <code>AccessDecisionManager</code> calling a <code>RunAsManager</code>. This might be useful in reasonably unusual situations, such as if a services layer method needs to call a remote system and present a different identity. Because Spring Security automatically propagates security identity from one server to another (assuming you’re using a properly-configured RMI or HttpInvoker remoting protocol client), this may be useful.<h3 id="8-5、AfterInvocationManager"><a href="#8-5、AfterInvocationManager" class="headerlink" title="8.5、AfterInvocationManager"></a>8.5、AfterInvocationManager</h3>Following the secure object invocation proceeding and then returning - which may mean a method invocation completing or a filter chain proceeding - the AbstractSecurityInterceptor gets one final chance to handle the invocation. At this stage the AbstractSecurityInterceptor is interested in possibly modifying the return object. We might want this to happen because an authorization decision couldn’t be made “on the way in” to a secure object invocation. Being highly pluggable, AbstractSecurityInterceptor will pass control to an AfterInvocationManager to actually modify the object if needed. This class can even entirely replace the object, or throw an exception, or not change it in any way as it chooses. The after-invocation checks will only be executed if the invocation is successful. If an exception occurs, the additional checks will be skipped.<h3 id="8-6、Extending-the-Secure-Object-Model"><a href="#8-6、Extending-the-Secure-Object-Model" class="headerlink" title="8.6、Extending the Secure Object Model"></a>8.6、Extending the Secure Object Model</h3>Only developers contemplating an entirely new way of intercepting and authorizing requests would need to use secure objects directly. For example, it would be possible to build a new secure object to secure calls to a messaging system. Anything that requires security and also provides a way of intercepting a call (like the AOP around advice semantics) is capable of being made into a secure object. Having said that, most Spring applications will simply use the three currently supported secure object types (AOP Alliance MethodInvocation, AspectJ JoinPoint and web request FilterInvocation) with complete transparency.<h3 id="8-7、Localization"><a href="#8-7、Localization" class="headerlink" title="8.7、Localization"></a>8.7、Localization</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"messageSource"</span></span></span><br><span class="line"><span class="tag">	<span class="attr">class</span>=<span class="string">"org.springframework.context.support.ReloadableResourceBundleMessageSource"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"basename"</span> <span class="attr">value</span>=<span class="string">"classpath:org/springframework/security/messages"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>Spring Security relies on Spring’s localization support in order to actually lookup the appropriate message. In order for this to work, you have to make sure that the locale from the incoming request is stored in Spring’s <code>org.springframework.context.i18n.LocaleContextHolder</code>. Spring MVC’s <code>DispatcherServlet</code> does this for your application automatically, but since Spring Security’s filters are invoked before this, the <code>LocaleContextHolder</code> needs to be set up to contain the correct <code>Locale</code> before the filters are called. You can either do this in a filter yourself (which must come before the Spring Security filters in <code>web.xml</code>) or you can use Spring’s RequestContextFilter. Please refer to the Spring Framework documentation for further details on using localization with Spring.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://wangjuneng.github.io/2018/03/02/Spring-Security-Authentication/" data-id="cjea3v7j20005jgwruym139hh" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-ORA-00020-maximum-number-of-processes-1000-exceeded" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/" class="article-date">
+  <time datetime="2018-03-02T05:01:10.000Z" itemprop="datePublished">2018-03-02</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/db/">Database</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/">ORA-00020: maximum number of processes (1000) exceeded</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>ORA-00020: maximum number of processes (1000) exceeded</p>
+<p>Alert log:</p>
+<p>ORA-00020: maximum number of processes (1000) exceeded<br> ORA-20 errors will not be written to the alert log for<br> the next minute. Please look at trace files to see all<br> the ORA-20 errors.<br>Mon Dec 29 22:48:29 2014<br>ORA-00020: maximum number of processes (1000) exceeded<br> ORA-20 errors will not be written to the alert log for<br> the next minute. Please look at trace files to see all<br> the ORA-20 errors.<br>Mon Dec 29 22:52:32 2014<br>ORA-00020: maximum number of processes (1000) exceeded<br> ORA-20 errors will not be written to the alert log for<br> the next minute. Please look at trace files to see all<br> the ORA-20 errors.</p>
+<p>Solution:<br>If you cannot connect to the sqlplus traditinal method use prelim option. This is one of the bypass option to connect the sqlplus.</p>
+<p>sqlplus -prelim is a backdoor method to connect the sqlplus where no othere method not supporting to create new session. It will connect only SGA and it will not create any new session.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ sqlplus -prelim</span><br><span class="line">oradb@CGABCDRADBOP01:/oracle_home/app $ sqlplus -prelim</span><br><span class="line">SQL*Plus: Release 11.2.0.4.0 Production on Tue Dec 30 13:04:12 2014</span><br><span class="line">Copyright (c) 1982, 2013, Oracle.  All rights reserved.</span><br><span class="line">Enter user-name: / as sysdba</span><br><span class="line">SQL&gt;</span><br><span class="line">Bounce the DB and  you can increase the processes with below options.</span><br><span class="line">processes=x</span><br><span class="line">sessions=x*1.1+5</span><br><span class="line">transactions=sessions*1.1</span><br><span class="line">sql&gt; show parameter sessions</span><br><span class="line">sql&gt; show parameter processes</span><br><span class="line">sql&gt; show parameter transactions</span><br><span class="line">sql&gt; alter system <span class="built_in">set</span> processes=500 SCOPE=SPFILE; </span><br><span class="line">sql&gt; alter system <span class="built_in">set</span> sessions=555 SCOPE=SPFILE; </span><br><span class="line">sql&gt; alter system <span class="built_in">set</span> transactions=610 SCOPE=SPFILE;</span><br></pre></td></tr></table></figure></p>
+<p>and Restart the database.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sql&gt;alter system <span class="built_in">set</span> open_cursors=1500 scope=both;</span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> processes=3000 scope=spfile;</span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> job_queue_processes=4 scope=both;</span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> undo_retention=10800 scope=both;</span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> max_shared_servers=50 scope=both;</span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> db_files=2000 scope=spfile; </span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> sessions=3305 SCOPE=SPFILE;  </span><br><span class="line">sql&gt;alter system <span class="built_in">set</span> transactions=3635 SCOPE=SPFILE;</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li>After you connect with <code>-prelim</code> mode, it’s also possible to use oradebug commands to examine the situation. </li>
+<li>It will not create new session and connecting only SGA. So you can performance all the oradebug utilities to analyse the issue. </li>
+</ol>
+<h3 id="prelim"><a href="#prelim" class="headerlink" title="-prelim"></a>-prelim</h3><p>Answer:  If you cannot connect, you have two choices, either wait (impacting the end users) or immediately bounce the instance. </p>
+<p>1 - Killing the background processes and removing the RAM segments. See killing oracle instance tips.</p>
+<p>2 - Using the -prelim SQL<em>Plus option to bypass creation of a new SQL</em>Plus session.</p>
+<p>The -prelim option of the SQL*Plus connect string was introduced in 10g to bypasses the creation of a new session in cases where the database is hung and not accepting traditional sqlplus connections:.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$sqlplus</span> /nolog</span><br><span class="line">SQL&gt; <span class="built_in">set</span> _prelim on</span><br><span class="line">SQL&gt; conn / as sysdba</span><br><span class="line">Prelim connection established</span><br><span class="line">SQL&gt; shutdown abort</span><br></pre></td></tr></table></figure></p>
+<p>Here is how to quickly generate a hang analysis immediately prior to re-starting a hung production instance:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">/u01/app/oracle/bin&gt;sqlplus system/mypass -prelim /nolog </span><br><span class="line">SQL*Plus: Release 10.2.0.2.0 - Production   </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug setmypid </span><br><span class="line">Statement processed.   </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug hanganalyze 12 </span><br><span class="line">Hang Analysis <span class="keyword">in</span> /u01/app/oracle/admin/mysid/udump/mysid_ora_1234.trc</span><br></pre></td></tr></table></figure></p>
+<p>You can also use the -prelim argument to capture Automated Session  History (ASH) data for a hung database:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">/u01/app/oracle/bin&gt;sqlplus system/mypass -prelim /nolog </span><br><span class="line">SQL*Plus: Release 10.2.0.2.0 - Production   </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug setmypid </span><br><span class="line">Statement processed.   </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug dump ashdump 10 </span><br><span class="line">Statement processed.   </span><br><span class="line"></span><br><span class="line">&gt;alter session <span class="built_in">set</span> events <span class="string">'immediate trace name ashdump level 10'</span>;</span><br><span class="line">-</span><br><span class="line"><span class="variable">$sqlplus</span> -prelim /nolog </span><br><span class="line"></span><br><span class="line">SQL&gt; connect / as sysdba </span><br><span class="line">Prelim connection established</span><br><span class="line"> </span><br><span class="line">SQL&gt; oradebug setmypid </span><br><span class="line">Statement processed. </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug hanganalyze 12 </span><br><span class="line">Hang Analysis <span class="keyword">in</span> C:\oracle\admin\orcl\udump\orcl_ora_5564.trc </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug dump systemstate 10 </span><br><span class="line">Statement processed. </span><br><span class="line"></span><br><span class="line">SQL&gt; oradebug tracefile_name C:\oracle\admin\orcl\udump\orcl_ora_5598.trc</span><br></pre></td></tr></table></figure></p>
+<p><a href="http://www.dba-oracle.com/t_connecting_hung_instance_using_prelim_option.htm" target="_blank" rel="noopener">http://www.dba-oracle.com/t_connecting_hung_instance_using_prelim_option.htm</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://wangjuneng.github.io/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/" data-id="cjea3v7j7000ajgwr4veslerh" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Spring-Security-Core-Component" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/01/Spring-Security-Core-Component/" class="article-date">
+  <time datetime="2018-03-01T14:47:30.000Z" itemprop="datePublished">2018-03-01</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/java/">Java</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/01/Spring-Security-Core-Component/">Spring Security Core Component</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="一、SecurityContextHolder-SecurityContext-And-Authentication-Object"><a href="#一、SecurityContextHolder-SecurityContext-And-Authentication-Object" class="headerlink" title="一、SecurityContextHolder,SecurityContext And Authentication Object"></a>一、SecurityContextHolder,SecurityContext And Authentication Object</h2><p>The most fundamental object is <code>SecurityContextHolder</code> 存储应用程序当前安全上下文的详细信息的地方,其中包括当前使用应用程序<code>主体</code>的详细信息。在默认策略中使用<code>ThreadLocal</code>存储<code>主体</code>信息，其它存储策略如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*设置主要信息存储策略是通过System property</span></span><br><span class="line"><span class="comment"> * spring.security.strategy</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> String strategyName = System.getProperty(SYSTEM_PROPERTY);</span><br><span class="line"></span><br><span class="line">GlobalSecurityContextHolderStrategy <span class="comment">//SecurityContextHolder.MODE_GLOBAL</span></span><br><span class="line">InheritableThreadLocalSecurityContextHolderStrategy <span class="comment">//SecurityContextHolder.MODE_INHERITABLETHREADLOCAL</span></span><br><span class="line">ThreadLocalSecurityContextHolderStrategy <span class="comment">//SecurityContextHolder.MODE_THREADLOCAL</span></span><br><span class="line">ReactiveSecurityContextHolder <span class="comment">//jdk 8 </span></span><br><span class="line"><span class="comment">//自定义存储策略 加载方式如下</span></span><br><span class="line">Class&lt;?&gt; clazz = Class.forName(strategyName);</span><br><span class="line">Constructor&lt;?&gt; customStrategy = clazz.getConstructor();</span><br><span class="line">strategy = (SecurityContextHolderStrategy)customStrategy.newInstance();</span><br></pre></td></tr></table></figure></p>
+<h3 id="Obtaining-information-about-the-current-user"><a href="#Obtaining-information-about-the-current-user" class="headerlink" title="Obtaining information about the current user"></a>Obtaining information about the current user</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (principal <span class="keyword">instanceof</span> UserDetails) &#123;</span><br><span class="line">    String username = ((UserDetails)principal).getUsername();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    String username = principal.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="二、The-UserDetailsService"><a href="#二、The-UserDetailsService" class="headerlink" title="二、The UserDetailsService"></a>二、The UserDetailsService</h2><p>从上面代码片段中可以获取到<code>Authentication</code>对象，<code>Principal</code>是一个Object ,大多数情况可以被转换为<code>UserDetails</code>对象，它代表一个<code>主体</code>。但在可扩展的程序中，<code>UserDetails</code>可以看作自己的用户数据库与Security Security需要<code>SecurityContextHolder</code>的适配器，也可对用其它进行扩展，将其强转为扩展实例，可以增加相应的方法（<code>getEmail()</code>…)。<br>可以通过<code>UserDetailsService</code>实现获取<code>UserDetails</code>对象，<code>UserDetailsService</code>接口只有一个方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">UserDetails <span class="title">loadUserByUsername</span><span class="params">(String username)</span> <span class="keyword">throws</span> UsernameNotFoundException</span>;</span><br></pre></td></tr></table></figure></p>
+<pre><code>在认证完成之后`UserDetails`将用来构建`Authentication`对象并存储在`SecurityContextHolder`中，Spring Security 提供简单的实现`JdbcDaoImpl`。
+</code></pre><h2 id="三、GrantedAuthority"><a href="#三、GrantedAuthority" class="headerlink" title="三、GrantedAuthority"></a>三、GrantedAuthority</h2><p><code>Authentication</code>除了<code>主体</code>，另一个重要的方法是<code>getAuthorities()</code>,此方法提供<code>GrantedAuthority</code>列表。</p>
+<h2 id="四、总结"><a href="#四、总结" class="headerlink" title="四、总结"></a>四、总结</h2><ul>
+<li><code>SecurityContextHolder</code> 用来访问<code>SecurityContext</code></li>
+<li><code>SecurityContext</code> 持有身份验证和可能的特定于请求的安全信息</li>
+<li><code>Authentication</code> 代表认证<code>主体</code></li>
+<li><code>GrantedAuthority</code> 代码授予<code>主体</code>的应用程序权限</li>
+<li><code>UserDetails</code>  应用程序的DAO或其他安全数据源提供必要的信息来构建Authentication对象。</li>
+<li><code>UserDetailsService</code> 定义查询<code>UserDetails</code>接口</li>
+</ul>
+<p><a href="https://docs.spring.io/spring-security/site/docs/4.2.4.RELEASE/reference/htmlsingle/#technical-overview" target="_blank" rel="noopener">https://docs.spring.io/spring-security/site/docs/4.2.4.RELEASE/reference/htmlsingle/#technical-overview</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://wangjuneng.github.io/2018/03/01/Spring-Security-Core-Component/" data-id="cjea3v7iv0001jgwrm3wrs7j8" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-GIT-常用命令" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/01/GIT-常用命令/" class="article-date">
+  <time datetime="2018-03-01T05:47:07.000Z" itemprop="datePublished">2018-03-01</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tools/">Tools</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/01/GIT-常用命令/">GIT 常用命令</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="一、新建代码库"><a href="#一、新建代码库" class="headerlink" title="一、新建代码库"></a>一、新建代码库</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在当前目录新建一个Git代码库</span></span><br><span class="line">$ git init</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建一个目录，将其初始化为Git代码库</span></span><br><span class="line">$ git init [project-name]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下载一个项目和它的整个代码历史</span></span><br><span class="line">$ git <span class="built_in">clone</span> [url]</span><br></pre></td></tr></table></figure>
+<h2 id="二、配置"><a href="#二、配置" class="headerlink" title="二、配置"></a>二、配置</h2><p>Git的设置文件为<code>.gitconfig</code>，它可以在用户主目录下（全局配置），也可以在项目目录下（项目配置）。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 显示当前的Git配置</span></span><br><span class="line">$ git config --list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编辑Git配置文件</span></span><br><span class="line">$ git config -e [--global]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置提交代码时的用户信息</span></span><br><span class="line">$ git config [--global] user.name <span class="string">"[name]"</span></span><br><span class="line">$ git config [--global] user.email <span class="string">"[email address]"</span></span><br></pre></td></tr></table></figure></p>
+<p>##三、增加/删除文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加指定文件到暂存区</span></span><br><span class="line">$ git add [file1] [file2] ...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加指定目录到暂存区，包括子目录</span></span><br><span class="line">$ git add [dir]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加当前目录的所有文件到暂存区</span></span><br><span class="line">$ git add .</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加每个变化前，都会要求确认</span></span><br><span class="line"><span class="comment"># 对于同一个文件的多处变化，可以实现分次提交</span></span><br><span class="line">$ git add -p</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除工作区文件，并且将这次删除放入暂存区</span></span><br><span class="line">$ git rm [file1] [file2] ...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止追踪指定文件，但该文件会保留在工作区</span></span><br><span class="line">$ git rm --cached [file]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 改名文件，并且将这个改名放入暂存区</span></span><br><span class="line">$ git mv [file-original] [file-renamed]</span><br></pre></td></tr></table></figure></p>
+<h2 id="四、代码提交"><a href="#四、代码提交" class="headerlink" title="四、代码提交"></a>四、代码提交</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提交暂存区到仓库区</span></span><br><span class="line">$ git commit -m [message]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提交暂存区的指定文件到仓库区</span></span><br><span class="line">$ git commit [file1] [file2] ... -m [message]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提交工作区自上次commit之后的变化，直接到仓库区</span></span><br><span class="line">$ git commit -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提交时显示所有diff信息</span></span><br><span class="line">$ git commit -v</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用一次新的commit，替代上一次提交</span></span><br><span class="line"><span class="comment"># 如果代码没有任何新变化，则用来改写上一次commit的提交信息</span></span><br><span class="line">$ git commit --amend -m [message]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重做上一次commit，并包括指定文件的新变化</span></span><br><span class="line">$ git commit --amend [file1] [file2] ...</span><br></pre></td></tr></table></figure>
+<h2 id="五、分支"><a href="#五、分支" class="headerlink" title="五、分支"></a>五、分支</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 列出所有本地分支</span></span><br><span class="line">$ git branch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出所有远程分支</span></span><br><span class="line">$ git branch -r</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出所有本地分支和远程分支</span></span><br><span class="line">$ git branch -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建一个分支，但依然停留在当前分支</span></span><br><span class="line">$ git branch [branch-name]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建一个分支，并切换到该分支</span></span><br><span class="line">$ git checkout -b [branch]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建一个分支，指向指定commit</span></span><br><span class="line">$ git branch [branch] [commit]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建一个分支，与指定的远程分支建立追踪关系</span></span><br><span class="line">$ git branch --track [branch] [remote-branch]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 切换到指定分支，并更新工作区</span></span><br><span class="line">$ git checkout [branch-name]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 切换到上一个分支</span></span><br><span class="line">$ git checkout -</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立追踪关系，在现有分支与指定的远程分支之间</span></span><br><span class="line">$ git branch --<span class="built_in">set</span>-upstream [branch] [remote-branch]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 合并指定分支到当前分支</span></span><br><span class="line">$ git merge [branch]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 选择一个commit，合并进当前分支</span></span><br><span class="line">$ git cherry-pick [commit]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除分支</span></span><br><span class="line">$ git branch -d [branch-name]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除远程分支</span></span><br><span class="line">$ git push origin --delete [branch-name]</span><br><span class="line">$ git branch -dr [remote/branch]</span><br></pre></td></tr></table></figure>
+<h2 id="六、标签"><a href="#六、标签" class="headerlink" title="六、标签"></a>六、标签</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 列出所有tag</span></span><br><span class="line">$ git tag</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建一个tag在当前commit</span></span><br><span class="line">$ git tag [tag]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建一个tag在指定commit</span></span><br><span class="line">$ git tag [tag] [commit]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除本地tag</span></span><br><span class="line">$ git tag -d [tag]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除远程tag</span></span><br><span class="line">$ git push origin :refs/tags/[tagName]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看tag信息</span></span><br><span class="line">$ git show [tag]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提交指定tag</span></span><br><span class="line">$ git push [remote] [tag]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提交所有tag</span></span><br><span class="line">$ git push [remote] --tags</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建一个分支，指向某个tag</span></span><br><span class="line">$ git checkout -b [branch] [tag]</span><br></pre></td></tr></table></figure>
+<h2 id="七、查看信息"><a href="#七、查看信息" class="headerlink" title="七、查看信息"></a>七、查看信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 显示有变更的文件</span></span><br><span class="line">$ git status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示当前分支的版本历史</span></span><br><span class="line">$ git <span class="built_in">log</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示commit历史，以及每次commit发生变更的文件</span></span><br><span class="line">$ git <span class="built_in">log</span> --<span class="built_in">stat</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 搜索提交历史，根据关键词</span></span><br><span class="line">$ git <span class="built_in">log</span> -S [keyword]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示某个commit之后的所有变动，每个commit占据一行</span></span><br><span class="line">$ git <span class="built_in">log</span> [tag] HEAD --pretty=format:%s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示某个commit之后的所有变动，其"提交说明"必须符合搜索条件</span></span><br><span class="line">$ git <span class="built_in">log</span> [tag] HEAD --grep feature</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示某个文件的版本历史，包括文件改名</span></span><br><span class="line">$ git <span class="built_in">log</span> --follow [file]</span><br><span class="line">$ git whatchanged [file]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示指定文件相关的每一次diff</span></span><br><span class="line">$ git <span class="built_in">log</span> -p [file]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示过去5次提交</span></span><br><span class="line">$ git <span class="built_in">log</span> -5 --pretty --oneline</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示所有提交过的用户，按提交次数排序</span></span><br><span class="line">$ git shortlog -sn</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示指定文件是什么人在什么时间修改过</span></span><br><span class="line">$ git blame [file]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示暂存区和工作区的差异</span></span><br><span class="line">$ git diff</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示暂存区和上一个commit的差异</span></span><br><span class="line">$ git diff --cached [file]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示工作区与当前分支最新commit之间的差异</span></span><br><span class="line">$ git diff HEAD</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示两次提交之间的差异</span></span><br><span class="line">$ git diff [first-branch]...[second-branch]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示今天你写了多少行代码</span></span><br><span class="line">$ git diff --shortstat <span class="string">"@&#123;0 day ago&#125;"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示某次提交的元数据和内容变化</span></span><br><span class="line">$ git show [commit]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示某次提交发生变化的文件</span></span><br><span class="line">$ git show --name-only [commit]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示某次提交时，某个文件的内容</span></span><br><span class="line">$ git show [commit]:[filename]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示当前分支的最近几次提交</span></span><br><span class="line">$ git reflog</span><br></pre></td></tr></table></figure>
+<h2 id="八、远程同步"><a href="#八、远程同步" class="headerlink" title="八、远程同步"></a>八、远程同步</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 下载远程仓库的所有变动</span></span><br><span class="line">$ git fetch [remote]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示所有远程仓库</span></span><br><span class="line">$ git remote -v</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示某个远程仓库的信息</span></span><br><span class="line">$ git remote show [remote]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 增加一个新的远程仓库，并命名</span></span><br><span class="line">$ git remote add [shortname] [url]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取回远程仓库的变化，并与本地分支合并</span></span><br><span class="line">$ git pull [remote] [branch]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 上传本地指定分支到远程仓库</span></span><br><span class="line">$ git push [remote] [branch]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 强行推送当前分支到远程仓库，即使有冲突</span></span><br><span class="line">$ git push [remote] --force</span><br><span class="line"></span><br><span class="line"><span class="comment"># 推送所有分支到远程仓库</span></span><br><span class="line">$ git push [remote] --all</span><br></pre></td></tr></table></figure>
+<h2 id="九、撤销"><a href="#九、撤销" class="headerlink" title="九、撤销"></a>九、撤销</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 恢复暂存区的指定文件到工作区</span></span><br><span class="line">$ git checkout [file]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 恢复某个commit的指定文件到暂存区和工作区</span></span><br><span class="line">$ git checkout [commit] [file]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 恢复暂存区的所有文件到工作区</span></span><br><span class="line">$ git checkout .</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重置暂存区的指定文件，与上一次commit保持一致，但工作区不变</span></span><br><span class="line">$ git reset [file]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重置暂存区与工作区，与上一次commit保持一致</span></span><br><span class="line">$ git reset --hard</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重置当前分支的指针为指定commit，同时重置暂存区，但工作区不变</span></span><br><span class="line">$ git reset [commit]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重置当前分支的HEAD为指定commit，同时重置暂存区和工作区，与指定commit一致</span></span><br><span class="line">$ git reset --hard [commit]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重置当前HEAD为指定commit，但保持暂存区和工作区不变</span></span><br><span class="line">$ git reset --keep [commit]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建一个commit，用来撤销指定commit</span></span><br><span class="line"><span class="comment"># 后者的所有变化都将被前者抵消，并且应用到当前分支</span></span><br><span class="line">$ git revert [commit]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 暂时将未提交的变化移除，稍后再移入</span></span><br><span class="line">$ git stash</span><br><span class="line">$ git stash pop</span><br></pre></td></tr></table></figure>
+<h2 id="十、其他"><a href="#十、其他" class="headerlink" title="十、其他"></a>十、其他</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 生成一个可供发布的压缩包</span></span><br><span class="line">$ git archive</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://wangjuneng.github.io/2018/03/01/GIT-常用命令/" data-id="cjea3v7iq0000jgwrcbdryllh" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Git/">Git</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-使用hexo-github搭建免费个人博客详细教程" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/02/26/使用hexo-github搭建免费个人博客详细教程/" class="article-date">
+  <time datetime="2018-02-26T11:00:23.000Z" itemprop="datePublished">2018-02-26</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/other/">Others</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/02/26/使用hexo-github搭建免费个人博客详细教程/">使用hexo+github搭建免费个人博客详细教程</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="Hexo简介"><a href="#Hexo简介" class="headerlink" title="Hexo简介"></a>Hexo简介</h2><p> Hexo是一个简单、快速、强大的基于 Github Pages 的博客发布工具，支持Markdown格式，有众多优秀插件和主题。</p>
+<p> 官网： <a href="http://hexo.io" target="_blank" rel="noopener">http://hexo.io</a><br> github: <a href="https://github.com/hexojs/hexo" target="_blank" rel="noopener">https://github.com/hexojs/hexo</a></p>
+<h3 id="Hexo安装"><a href="#Hexo安装" class="headerlink" title="Hexo安装"></a>Hexo安装</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ npm install -g hexo</span><br><span class="line">$ hexo init</span><br><span class="line">$ hexo g <span class="comment"># 生成</span></span><br><span class="line">$ hexo s <span class="comment"># 启动服务</span></span><br></pre></td></tr></table></figure>
+<h3 id="常用hexo命令"><a href="#常用hexo命令" class="headerlink" title="常用hexo命令"></a>常用hexo命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">hexo new <span class="string">"postName"</span> <span class="comment">#新建文章</span></span><br><span class="line">hexo new page <span class="string">"pageName"</span> <span class="comment">#新建页面</span></span><br><span class="line">hexo generate <span class="comment">#生成静态页面至public目录</span></span><br><span class="line">hexo server <span class="comment">#开启预览访问端口（默认端口4000，'ctrl + c'关闭server）</span></span><br><span class="line">hexo deploy <span class="comment">#部署到GitHub</span></span><br><span class="line">hexo <span class="built_in">help</span>  <span class="comment"># 查看帮助</span></span><br><span class="line">hexo version  <span class="comment">#查看Hexo的版本</span></span><br><span class="line">hexo migrate &lt;<span class="built_in">type</span>&gt; <span class="comment">#Migrates content from other blog systems.</span></span><br><span class="line">hexo clean <span class="comment">#Cleans the cache file (db.json) and generated files (public).</span></span><br><span class="line">hexo list &lt;<span class="built_in">type</span>&gt; <span class="comment">#Lists all routes.</span></span><br><span class="line"></span><br><span class="line">hexo n == hexo new</span><br><span class="line">hexo g == hexo generate</span><br><span class="line">hexo s == hexo server</span><br><span class="line">hexo d == hexo deploy</span><br><span class="line"></span><br><span class="line">hexo s -g <span class="comment">#生成并本地预览</span></span><br><span class="line">hexo d -g <span class="comment">#生成并上传</span></span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://wangjuneng.github.io/2018/02/26/使用hexo-github搭建免费个人博客详细教程/" data-id="cjea3v7j50006jgwrzua1h4gt" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Github/">Github</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Hexo/">Hexo</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/02/26/hello-world/" class="article-date">
+  <time datetime="2018-02-26T06:39:04.969Z" itemprop="datePublished">2018-02-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/02/26/hello-world/">Hello World</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://wangjuneng.github.io/2018/02/26/hello-world/" data-id="cjea3v7j00004jgwrkowo9da1" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/db/">Database</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/other/">Others</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">Tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Oracle/">Oracle</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Oracle/" style="font-size: 10px;">Oracle</a> <a href="/tags/Spring-Security/" style="font-size: 20px;">Spring Security</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">February 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/02/Spring-Security-Authentication/">Spring Security Authentication</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/">ORA-00020: maximum number of processes (1000) exceeded</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/01/Spring-Security-Core-Component/">Spring Security Core Component</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/01/GIT-常用命令/">GIT 常用命令</a>
+          </li>
+        
+          <li>
+            <a href="/2018/02/26/使用hexo-github搭建免费个人博客详细教程/">使用hexo+github搭建免费个人博客详细教程</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 Jim Wang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
