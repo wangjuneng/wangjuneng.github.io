@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Spring Security Core Services | Jim Wang&#39;s individual technology blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Now that we have a high-level overview of the Spring Security architecture and its core classes, let’s take a closer look at one or two of the core interfaces and their implementations, in particular">
+<meta name="keywords" content="Spring Security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Security Core Services">
+<meta property="og:url" content="https://wangjuneng.github.io/2018/03/05/Spring-Security-Core-Services/index.html">
+<meta property="og:site_name" content="Jim Wang&#39;s individual technology blog">
+<meta property="og:description" content="Now that we have a high-level overview of the Spring Security architecture and its core classes, let’s take a closer look at one or two of the core interfaces and their implementations, in particular">
+<meta property="og:updated_time" content="2018-03-05T14:41:28.906Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spring Security Core Services">
+<meta name="twitter:description" content="Now that we have a high-level overview of the Spring Security architecture and its core classes, let’s take a closer look at one or two of the core interfaces and their implementations, in particular">
+  
+    <link rel="alternate" href="/atom.xml" title="Jim Wang&#39;s individual technology blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Jim Wang&#39;s individual technology blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://wangjuneng.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Spring-Security-Core-Services" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/05/Spring-Security-Core-Services/" class="article-date">
+  <time datetime="2018-03-05T14:28:34.000Z" itemprop="datePublished">2018-03-05</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/java/">Java</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Spring Security Core Services
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Now that we have a high-level overview of the Spring Security architecture and its core classes, let’s take a closer look at one or two of the core interfaces and their implementations, in particular the <code>AuthenticationManager</code>, <code>UserDetailsService</code> and the <code>AccessDecisionManager</code>. These crop up regularly throughout the remainder of this document so it’s important you know how they are configured and how they operate.</p>
+<h2 id="1、Core-Services"><a href="#1、Core-Services" class="headerlink" title="1、Core Services"></a>1、Core Services</h2><p>The AuthenticationManager, ProviderManager and AuthenticationProvider</p>
+<p>The <code>AuthenticationManager</code> is just an interface, so the implementation can be anything we choose, but how does it work in practice? What if we need to check multiple authentication databases or a combination of different authentication services such as a database and an LDAP server?</p>
+<p>The default implementation in Spring Security is called ProviderManager and rather than handling the authentication request itself, it delegates to a list of configured AuthenticationProvider s, each of which is queried in turn to see if it can perform the authentication. Each provider will either throw an exception or return a fully populated Authentication object. Remember our good friends, UserDetails and UserDetailsService? If not, head back to the previous chapter and refresh your memory. The most common approach to verifying an authentication request is to load the corresponding UserDetails and check the loaded password against the one that has been entered by the user. This is the approach used by the DaoAuthenticationProvider (see below). The loaded UserDetails object - and particularly the GrantedAuthority s it contains - will be used when building the fully populated Authentication object which is returned from a successful authentication and stored in the SecurityContext.</p>
+<p>If you are using the namespace, an instance of ProviderManager is created and maintained internally, and you add providers to it by using the namespace authentication provider elements (see the namespace chapter). In this case, you should not declare a ProviderManager bean in your application context. However, if you are not using the namespace then you would declare it like so:<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"authenticationManager"</span> <span class="attr">class</span>=<span class="string">"org.springframework.security.authentication.ProviderManager"</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">constructor-arg</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">list</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">ref</span> <span class="attr">local</span>=<span class="string">"daoAuthenticationProvider"</span>/&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">ref</span> <span class="attr">local</span>=<span class="string">"anonymousAuthenticationProvider"</span>/&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">ref</span> <span class="attr">local</span>=<span class="string">"ldapAuthenticationProvider"</span>/&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">list</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">constructor-arg</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>In the above example we have three providers. They are tried in the order shown (which is implied by the use of a List), with each provider able to attempt authentication, or skip authentication by simply returning null. If all implementations return null, the ProviderManager will throw a ProviderNotFoundException. If you’re interested in learning more about chaining providers, please refer to the ProviderManager Javadoc.</p>
+<p>Authentication mechanisms such as a web form-login processing filter are injected with a reference to the ProviderManager and will call it to handle their authentication requests. The providers you require will sometimes be interchangeable with the authentication mechanisms, while at other times they will depend on a specific authentication mechanism. For example, DaoAuthenticationProvider and LdapAuthenticationProvider are compatible with any mechanism which submits a simple username/password authentication request and so will work with form-based logins or HTTP Basic authentication. On the other hand, some authentication mechanisms create an authentication request object which can only be interpreted by a single type of AuthenticationProvider. An example of this would be JA-SIG CAS, which uses the notion of a service ticket and so can therefore only be authenticated by a CasAuthenticationProvider. You needn’t be too concerned about this, because if you forget to register a suitable provider, you’ll simply receive a ProviderNotFoundException when an attempt to authenticate is made.</p>
+<h3 id="1-1-Erasing-Credentials-on-Successful-Authentication"><a href="#1-1-Erasing-Credentials-on-Successful-Authentication" class="headerlink" title="1.1 Erasing Credentials on Successful Authentication"></a>1.1 Erasing Credentials on Successful Authentication</h3><p>By default (from Spring Security 3.1 onwards) the <code>ProviderManager</code> will attempt to clear any sensitive credentials information from the <code>Authentication</code> object which is returned by a successful authentication request. This prevents information like passwords being retained longer than necessary.</p>
+<p>This may cause issues when you are using a cache of user objects, for example, to improve performance in a stateless application. If the Authentication contains a reference to an object in the cache (such as a <code>UserDetails</code> instance) and this has its credentials removed, then it will no longer be possible to authenticate against the cached value. You need to take this into account if you are using a cache. An obvious solution is to make a copy of the object first, either in the cache implementation or in the <code>AuthenticationProvider</code> which creates the returned Authentication object. Alternatively, you can disable the eraseCredentialsAfterAuthentication property on <code>ProviderManager</code>. See the Javadoc for more information.</p>
+<h3 id="1-2-DaoAuthenticationProvider"><a href="#1-2-DaoAuthenticationProvider" class="headerlink" title="1.2 DaoAuthenticationProvider"></a>1.2 DaoAuthenticationProvider</h3><p>The simplest <code>AuthenticationProvider</code> implemented by Spring Security is <code>DaoAuthenticationProvider</code>, which is also one of the earliest supported by the framework. It leverages a <code>UserDetailsService</code> (as a DAO) in order to lookup the username, password and GrantedAuthority s. It authenticates the user simply by comparing the password submitted in a <code>UsernamePasswordAuthenticationToken</code> against the one loaded by the <code>UserDetailsService</code>. Configuring the provider is quite simple:<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"daoAuthenticationProvider"</span></span></span><br><span class="line"><span class="tag">	<span class="attr">class</span>=<span class="string">"org.springframework.security.authentication.dao.DaoAuthenticationProvider"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"userDetailsService"</span> <span class="attr">ref</span>=<span class="string">"inMemoryDaoImpl"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"passwordEncoder"</span> <span class="attr">ref</span>=<span class="string">"passwordEncoder"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>The <code>PasswordEncoder</code> is optional. A <code>PasswordEncoder</code> provides encoding and decoding of passwords presented in the UserDetails object that is returned from the configured <code>UserDetailsService</code>. This will be discussed in more detail below.</p>
+<h2 id="2、UserDetailsService-Implementations"><a href="#2、UserDetailsService-Implementations" class="headerlink" title="2、UserDetailsService Implementations"></a>2、UserDetailsService Implementations</h2><p>As mentioned in the earlier in this reference guide, most authentication providers take advantage of the UserDetails and UserDetailsService interfaces. Recall that the contract for UserDetailsService is a single method:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">UserDetails <span class="title">loadUserByUsername</span><span class="params">(String username)</span> <span class="keyword">throws</span> UsernameNotFoundException</span>;</span><br></pre></td></tr></table></figure></p>
+<p>The returned <code>UserDetails</code> is an interface that provides getters that guarantee non-null provision of authentication information such as the username, password, granted authorities and whether the user account is enabled or disabled. Most authentication providers will use a <code>UserDetailsService</code>, even if the username and password are not actually used as part of the authentication decision. They may use the returned <code>UserDetails</code> object just for its <code>GrantedAuthority</code> information, because some other system (like LDAP or X.509 or CAS etc) has undertaken the responsibility of actually validating the credentials.</p>
+<p>Given <code>UserDetailsService</code> is so simple to implement, it should be easy for users to retrieve authentication information using a persistence strategy of their choice. Having said that, Spring Security does include a couple of useful base implementations, which we’ll look at below.</p>
+<h3 id="2-1-In-Memory-Authentication"><a href="#2-1-In-Memory-Authentication" class="headerlink" title="2.1  In-Memory Authentication"></a>2.1  In-Memory Authentication</h3><p>Is easy to use create a custom UserDetailsService implementation that extracts information from a persistence engine of choice, but many applications do not require such complexity. This is particularly true if you’re building a prototype application or just starting integrating Spring Security, when you don’t really want to spend time configuring databases or writing UserDetailsService implementations. For this sort of situation, a simple option is to use the user-service element from the security namespace:<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">user-service</span> <span class="attr">id</span>=<span class="string">"userDetailsService"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">user</span> <span class="attr">name</span>=<span class="string">"jimi"</span> <span class="attr">password</span>=<span class="string">"jimispassword"</span> <span class="attr">authorities</span>=<span class="string">"ROLE_USER, ROLE_ADMIN"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">user</span> <span class="attr">name</span>=<span class="string">"bob"</span> <span class="attr">password</span>=<span class="string">"bobspassword"</span> <span class="attr">authorities</span>=<span class="string">"ROLE_USER"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">user-service</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>This also supports the use of an external properties file:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;user-service id=<span class="string">"userDetailsService"</span> properties=<span class="string">"users.properties"</span>/&gt;</span><br></pre></td></tr></table></figure></p>
+<p>The properties file should contain entries in the form<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username=password,grantedAuthority[,grantedAuthority][,enabled|disabled]</span><br></pre></td></tr></table></figure></p>
+<p>For example<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jimi=jimispassword,ROLE_USER,ROLE_ADMIN,enabled</span><br><span class="line">bob=bobspassword,ROLE_USER,enabled</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-2-JdbcDaoImpl"><a href="#2-2-JdbcDaoImpl" class="headerlink" title="2.2 JdbcDaoImpl"></a>2.2 JdbcDaoImpl</h3><p>Spring Security also includes a <code>UserDetailsService</code> that can obtain authentication information from a JDBC data source. Internally Spring JDBC is used, so it avoids the complexity of a fully-featured object relational mapper (ORM) just to store user details. If your application does use an ORM tool, you might prefer to write a custom <code>UserDetailsService</code> to reuse the mapping files you’ve probably already created. Returning to <code>JdbcDaoImpl</code>, an example configuration is shown below:<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"dataSource"</span> <span class="attr">class</span>=<span class="string">"org.springframework.jdbc.datasource.DriverManagerDataSource"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"driverClassName"</span> <span class="attr">value</span>=<span class="string">"org.hsqldb.jdbcDriver"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"url"</span> <span class="attr">value</span>=<span class="string">"jdbc:hsqldb:hsql://localhost:9001"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"username"</span> <span class="attr">value</span>=<span class="string">"sa"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"password"</span> <span class="attr">value</span>=<span class="string">""</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"userDetailsService"</span> <span class="attr">class</span>=<span class="string">"org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"dataSource"</span> <span class="attr">ref</span>=<span class="string">"dataSource"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>You can use different relational database management systems by modifying the DriverManagerDataSource shown above. You can also use a global data source obtained from JNDI, as with any other Spring configuration.</p>
+<h4 id="Authority-Groups"><a href="#Authority-Groups" class="headerlink" title="Authority Groups"></a>Authority Groups</h4><p>By default, <code>JdbcDaoImpl</code> loads the authorities for a single user with the assumption that the authorities are mapped directly to users (see the database schema appendix). An alternative approach is to partition the authorities into groups and assign groups to the user. Some people prefer this approach as a means of administering user rights. See the <code>JdbcDaoImpl</code> Javadoc for more information on how to enable the use of group authorities. The group schema is also included in the appendix.</p>
+<h2 id="3-Password-Encoding"><a href="#3-Password-Encoding" class="headerlink" title="3 Password Encoding"></a>3 Password Encoding</h2><p>Spring Security’s <code>PasswordEncoder</code> interface is used to support the use of passwords which are encoded in some way in persistent storage. You should never store passwords in plain text. Always use a one-way password hashing algorithm such as bcrypt which uses a built-in salt value which is different for each stored password. Do not use a plain hash function such as MD5 or SHA, or even a salted version. Bcrypt is deliberately designed to be slow and to hinder offline password cracking, whereas standard hash algorithms are fast and can easily be used to test thousands of passwords in parallel on custom hardware. You might think this doesn’t apply to you since your password database is secure and offline attacks aren’t a risk. If so, do some research and read up on all the high-profile sites which have been compromised in this way and have been pilloried for storing their passwords insecurely. It’s best to be on the safe side. Using <code>org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder</code>“ is a good choice for security. There are also compatible implementations in other common programming languages so it a good choice for interoperability too.</p>
+<p>If you are using a legacy system which already has hashed passwords, then you will need to use an encoder which matches your current algorithm, at least until you can migrate your users to a more secure scheme (usually this will involve asking the user to set a new password, since hashes are irreversible). Spring Security has a package containing legacy password encoding implementation, namely, org.springframework.security.authentication.encoding. The <code>DaoAuthenticationProvider</code> can be injected with either the new or legacy <code>PasswordEncoder</code> types.</p>
+<h2 id="4-Jackson-Support"><a href="#4-Jackson-Support" class="headerlink" title="4 Jackson Support"></a>4 Jackson Support</h2><p>Spring Security has added Jackson Support for persisting Spring Security related classes. This can improve the performance of serializing Spring Security related classes when working with distributed sessions (i.e. session replication, Spring Session, etc).</p>
+<p>To use it, register the JacksonJacksonModules.getModules(ClassLoader) as Jackson Modules.<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ObjectMapper mapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">ClassLoader loader = getClass().getClassLoader();</span><br><span class="line">List&lt;Module&gt; modules = SecurityJackson2Modules.getModules(loader);</span><br><span class="line">mapper.registerModules(modules);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ... use ObjectMapper as normally ...</span></span><br><span class="line">SecurityContext context = <span class="keyword">new</span> SecurityContextImpl();</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">String json = mapper.writeValueAsString(context);</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://wangjuneng.github.io/2018/03/05/Spring-Security-Core-Services/" data-id="cjeec35w80005ukwr234lm2gt" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2018/03/02/Spring-Security-Authentication/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Spring Security Authentication</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/db/">Database</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/other/">Others</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">Tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Oracle/">Oracle</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Oracle/" style="font-size: 10px;">Oracle</a> <a href="/tags/Spring-Security/" style="font-size: 20px;">Spring Security</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">February 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/05/Spring-Security-Core-Services/">Spring Security Core Services</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/02/Spring-Security-Authentication/">Spring Security Authentication</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/">ORA-00020: maximum number of processes (1000) exceeded</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/01/Spring-Security-Core-Component/">Spring Security Core Component</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/01/GIT-常用命令/">GIT 常用命令</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 Jim Wang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
