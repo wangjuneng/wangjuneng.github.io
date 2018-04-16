@@ -61,6 +61,72 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Spring-boot-基础配置" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/27/Spring-boot-基础配置/" class="article-date">
+  <time datetime="2018-03-27T07:21:18.000Z" itemprop="datePublished">2018-03-27</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/java/">Java</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/27/Spring-boot-基础配置/">Spring boot 基础配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="基础配置"><a href="#基础配置" class="headerlink" title="基础配置"></a>基础配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-Dserver.port=8088 //指定端口</span><br><span class="line">-Dserver.tomcat.basedir //指定临时目录</span><br><span class="line"></span><br><span class="line">@SpringBootApplication // same as @Configuration @EnableAutoConfiguration @ComponentScan</span><br></pre></td></tr></table></figure>
+<h2 id="spring-boot-maven-plugin"><a href="#spring-boot-maven-plugin" class="headerlink" title="spring-boot-maven-plugin"></a>spring-boot-maven-plugin</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.5.6.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">mainClass</span>&gt;</span>$&#123;start-class&#125;<span class="tag">&lt;/<span class="name">mainClass</span>&gt;</span> #指定main class</span><br><span class="line">    <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">goal</span>&gt;</span>repackage<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="mvn-打包发布运行"><a href="#mvn-打包发布运行" class="headerlink" title="mvn 打包发布运行"></a>mvn 打包发布运行</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ mvn package </span><br><span class="line"></span><br><span class="line">$ java -jar target/myproject-0.0.1-SNAPSHOT.jar</span><br><span class="line"></span><br><span class="line">  .   ____          _            __ _ _</span><br><span class="line"> /\\ / ___&apos;_ __ _ _(_)_ __  __ _ \ \ \ \</span><br><span class="line">( ( )\___ | &apos;_ | &apos;_| | &apos;_ \/ _` | \ \ \ \</span><br><span class="line"> \\/  ___)| |_)| | | | | || (_| |  ) ) ) )</span><br><span class="line">  &apos;  |____| .__|_| |_|_| |_\__, | / / / /</span><br><span class="line"> =========|_|==============|___/=/_/_/_/</span><br><span class="line"> :: Spring Boot ::  (v2.0.0.RELEASE)</span><br><span class="line">....... . . .</span><br><span class="line">....... . . . (log output here)</span><br><span class="line">....... . . .</span><br><span class="line">........ Started Example in 2.536 seconds (JVM running for 2.864)</span><br></pre></td></tr></table></figure>
+<h2 id="Using-Spring-Boot-without-the-Parent-POM"><a href="#Using-Spring-Boot-without-the-Parent-POM" class="headerlink" title="Using Spring Boot without the Parent POM"></a>Using Spring Boot without the Parent POM</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencyManagement</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">			<span class="comment">&lt;!-- Import dependency management from Spring Boot --&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-dependencies<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">version</span>&gt;</span>2.0.0.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">type</span>&gt;</span>pom<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">scope</span>&gt;</span>import<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencyManagement</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="Spring-Boot-application-starters"><a href="#Spring-Boot-application-starters" class="headerlink" title="Spring Boot application starters"></a>Spring Boot application starters</h2><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>spring-boot-starter                        | Core starter, including auto-configuration support, logging and YAML<br>spring-boot-starter-activemq               | Starter for JMS messaging using Apache ActiveMQ<br>spring-boot-starter-amqp                   | Starter for using Spring AMQP and Rabbit MQ<br>spring-boot-starter-aop                    | Starter for aspect-oriented programming with Spring AOP and AspectJPomPom<br>spring-boot-starter-artemis                | Starter for JMS messaging using Apache Artemis<br>spring-boot-starter-batch                  | Starter for using Spring Batch<br>spring-boot-starter-cache                  | Starter for using Spring Framework’s caching support<br>spring-boot-starter-cloud-connectors       | Starter for using Spring Cloud Connectors which simplifies connecting to services in cloud platforms like Cloud Foundry and Heroku<br>spring-boot-starter-data-cassandra         | Starter for using Cassandra distributed database and Spring Data Cassandra<br>spring-boot-starter-data-cassandra-reactive| Starter for using Cassandra distributed database and Spring Data Cassandra ReactivePom<br>spring-boot-starter-data-couchbase         | Starter for using Couchbase document-oriented database and Spring Data Couchbase<br>spring-boot-starter-data-couchbase-reactive|Starter for using Couchbase document-oriented database and Spring Data Couchbase Reactive<br>spring-boot-starter-data-elasticsearch     |Starter for using Elasticsearch search and analytics engine and Spring Data Elasticsearch<br>spring-boot-starter-data-jpa               |Starter for using Spring Data JPA with Hibernate<br>spring-boot-starter-data-ldap              |Starter for using Spring Data LDAP<br>spring-boot-starter-data-mongodb           |Starter for using MongoDB document-oriented database and Spring Data MongoDB<br>spring-boot-starter-data-mongodb-reactive  |Starter for using MongoDB document-oriented database and Spring Data MongoDB Reactive<br>spring-boot-starter-data-neo4j             |Starter for using Neo4j graph database and Spring Data Neo4j<br>spring-boot-starter-data-redis             |Starter for using Redis key-value data store with Spring Data Redis and the Lettuce client<br>spring-boot-starter-data-redis-reactive    |Starter for using Redis key-value data store with Spring Data Redis reactive and the Lettuce client<br>spring-boot-starter-data-rest              |Starter for exposing Spring Data repositories over REST using Spring Data REST<br>spring-boot-starter-data-solr              |Starter for using the Apache Solr search platform with Spring Data Solr<br>spring-boot-starter-freemarker             |Starter for building MVC web applications using FreeMarker views<br>spring-boot-starter-groovy-templates       |Starter for building MVC web applications using Groovy Templates views<br>spring-boot-starter-hateoas                |Starter for building hypermedia-based RESTful web application with Spring MVC and Spring HATEOAS<br>spring-boot-starter-integration            |Starter for using Spring Integration<br>spring-boot-starter-jdbc                   |Starter for using JDBC with the Tomcat JDBC connection pool<br>spring-boot-starter-jersey                 |Starter for building RESTful web applications using JAX-RS and Jersey. An alternative to <code>spring-boot-starter-web</code><br>spring-boot-starter-jooq                   |Starter for using jOOQ to access SQL databases. An alternative to <code>spring-boot-starter-data-jpa</code> or <code>spring-boot-starter-jdbc</code><br>spring-boot-starter-json                   |Starter for reading and writing json<br>spring-boot-starter-jta-atomikos           |Starter for JTA transactions using Atomikos<br>spring-boot-starter-jta-bitronix           |Starter for JTA transactions using Bitronix<br>spring-boot-starter-jta-narayana           |Spring Boot Narayana JTA Starter<br>spring-boot-starter-mail                   |Starter for using Java Mail and Spring Framework’s email sending support<br>spring-boot-starter-mustache               |Starter for building web applications using Mustache views<br>spring-boot-starter-quartz                 |Spring Boot Quartz Starter<br>spring-boot-starter-security               |Starter for using Spring Security<br>spring-boot-starter-test                   |Starter for testing Spring Boot applications with libraries including JUnit, Hamcrest and Mockito<br>spring-boot-starter-thymeleaf              |Starter for building MVC web applications using Thymeleaf views<br>spring-boot-starter-validation             |Starter for using Java Bean Validation with Hibernate Validator<br>spring-boot-starter-web                    |Starter for building web, including RESTful, applications using Spring MVC. Uses Tomcat as the default embedded container<br>spring-boot-starter-web-services           |Starter for using Spring Web Services<br>spring-boot-starter-webflux                |Starter for building WebFlux applications using Spring Framework’s Reactive Web support<br>spring-boot-starter-websocket              |Starter for building WebSocket applications using Spring Framework’s WebSocket support</p>
+<h2 id="Spring-Boot-lt-gt-Spring-security"><a href="#Spring-Boot-lt-gt-Spring-security" class="headerlink" title="Spring Boot &lt;&gt; Spring security"></a>Spring Boot &lt;&gt; Spring security</h2><h3 id="Issue-one-Circular-View-path-error-Spring-boot"><a href="#Issue-one-Circular-View-path-error-Spring-boot" class="headerlink" title="Issue one Circular View path error Spring boot"></a>Issue one Circular View path error Spring boot</h3><p>Adding <code>spring-boot-starter-thymeleaf</code> dependency solved the problem.<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">解决方法一</span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-thymeleaf<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.4.0.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">解决方法二</span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">class</span>=<span class="string">"org.thymeleaf.templateresolver.ServletContextTemplateResolver"</span> <span class="attr">id</span>=<span class="string">"webTemplateResolver"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"prefix"</span> <span class="attr">value</span>=<span class="string">"WEB-INF/web-templates/"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"suffix"</span> <span class="attr">value</span>=<span class="string">".html"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"templateMode"</span> <span class="attr">value</span>=<span class="string">"HTML5"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"characterEncoding"</span> <span class="attr">value</span>=<span class="string">"UTF-8"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"order"</span> <span class="attr">value</span>=<span class="string">"2"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"cacheable"</span> <span class="attr">value</span>=<span class="string">"false"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">解决方法三</span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableWebMvc</span></span><br><span class="line"><span class="meta">@ComponentScan</span>(basePackages = &#123; <span class="string">"com.example.springmvc"</span> &#125;)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebMvcConfig</span> <span class="keyword">extends</span> <span class="title">WebMvcConfigurerAdapter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> InternalResourceViewResolver <span class="title">internalResourceViewResolver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        InternalResourceViewResolver resolver = <span class="keyword">new</span> InternalResourceViewResolver();</span><br><span class="line">        resolver.setPrefix(<span class="string">"/jsp/"</span>);</span><br><span class="line">        resolver.setSuffix(<span class="string">".jsp"</span>);</span><br><span class="line">        <span class="keyword">return</span> resolver;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Configure-a-DataSource"><a href="#Configure-a-DataSource" class="headerlink" title="Configure a DataSource"></a>Configure a DataSource</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-data-jpa<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.hsqldb<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hsqldb<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>runtime<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>DataSource configuration is controlled by external configuration properties in <code>spring.datasource.*.</code> For example, you might declare the following section in <code>application.properties</code>:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">spring.datasource.url=jdbc:mysql:<span class="comment">//localhost/test</span></span><br><span class="line">spring.datasource.username=dbuser</span><br><span class="line">spring.datasource.password=dbpass</span><br><span class="line">spring.datasource.driver-<span class="class"><span class="keyword">class</span>-<span class="title">name</span></span>=com.mysql.jdbc.Driver</span><br><span class="line"></span><br><span class="line">Connection to a JNDI DataSource</span><br><span class="line">spring.datasource.jndi-name=java:jboss/datasources/customers</span><br></pre></td></tr></table></figure></p>
+<h3 id="Using-JdbcTemplate"><a href="#Using-JdbcTemplate" class="headerlink" title="Using JdbcTemplate"></a>Using JdbcTemplate</h3><p>Spring’s <code>JdbcTemplate</code> and <code>NamedParameterJdbcTemplate</code> classes are auto-configured and you can <code>@Autowire</code> them directly into your own beans:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.annotation.Autowired;</span><br><span class="line"><span class="keyword">import</span> org.springframework.jdbc.core.JdbcTemplate;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyBean</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> JdbcTemplate jdbcTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyBean</span><span class="params">(JdbcTemplate jdbcTemplate)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.jdbcTemplate = jdbcTemplate;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p> page252</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://wangjuneng.github.io/2018/03/27/Spring-boot-基础配置/" data-id="cjg2bn9lw000f04wrtyi184n2" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Spring-Security-Core-Services" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/03/05/Spring-Security-Core-Services/" class="article-date">
@@ -116,7 +182,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://wangjuneng.github.io/2018/03/05/Spring-Security-Core-Services/" data-id="cjeec35w80005ukwr234lm2gt" class="article-share-link">Share</a>
+      <a data-url="https://wangjuneng.github.io/2018/03/05/Spring-Security-Core-Services/" data-id="cjg2bn9m0000g04wrxqtai9wz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
@@ -209,7 +275,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://wangjuneng.github.io/2018/03/02/Spring-Security-Authentication/" data-id="cjeec35ui0000ukwrlrmualp1" class="article-share-link">Share</a>
+      <a data-url="https://wangjuneng.github.io/2018/03/02/Spring-Security-Authentication/" data-id="cjg2bn9kn000404wr3m6c4jeu" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
@@ -268,7 +334,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://wangjuneng.github.io/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/" data-id="cjeec35xh000iukwrv8x1qdft" class="article-share-link">Share</a>
+      <a data-url="https://wangjuneng.github.io/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/" data-id="cjg2bn9j1000004wrru5d3jyb" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
@@ -324,7 +390,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://wangjuneng.github.io/2018/03/01/Spring-Security-Core-Component/" data-id="cjeec35w20004ukwr0kjm8ex7" class="article-share-link">Share</a>
+      <a data-url="https://wangjuneng.github.io/2018/03/01/Spring-Security-Core-Component/" data-id="cjg2bn9mp000m04wr2ss65ia5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
@@ -376,7 +442,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://wangjuneng.github.io/2018/03/01/GIT-常用命令/" data-id="cjeec35vl0001ukwrwryijk0f" class="article-share-link">Share</a>
+      <a data-url="https://wangjuneng.github.io/2018/03/01/GIT-常用命令/" data-id="cjg2bn9k5000104wro4nfvp90" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Git/">Git</a></li></ul>
@@ -421,7 +487,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://wangjuneng.github.io/2018/02/26/使用hexo-github搭建免费个人博客详细教程/" data-id="cjeec35xk000jukwr5p0lnf0y" class="article-share-link">Share</a>
+      <a data-url="https://wangjuneng.github.io/2018/02/26/使用hexo-github搭建免费个人博客详细教程/" data-id="cjg2bn9nj000q04wrb9irx0ff" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Github/">Github</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Hexo/">Hexo</a></li></ul>
@@ -468,7 +534,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://wangjuneng.github.io/2018/02/26/hello-world/" data-id="cjeec35yx000uukwrrql31hzs" class="article-share-link">Share</a>
+      <a data-url="https://wangjuneng.github.io/2018/02/26/hello-world/" data-id="cjg2bn9ms000n04wr99e59j8v" class="article-share-link">Share</a>
       
       
     </footer>
@@ -497,7 +563,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Oracle/">Oracle</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Oracle/">Oracle</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a></li></ul>
     </div>
   </div>
 
@@ -507,7 +573,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Oracle/" style="font-size: 10px;">Oracle</a> <a href="/tags/Spring-Security/" style="font-size: 20px;">Spring Security</a>
+      <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Oracle/" style="font-size: 10px;">Oracle</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/Spring-Security/" style="font-size: 20px;">Spring Security</a>
     </div>
   </div>
 
@@ -529,6 +595,10 @@
       <ul>
         
           <li>
+            <a href="/2018/03/27/Spring-boot-基础配置/">Spring boot 基础配置</a>
+          </li>
+        
+          <li>
             <a href="/2018/03/05/Spring-Security-Core-Services/">Spring Security Core Services</a>
           </li>
         
@@ -542,10 +612,6 @@
         
           <li>
             <a href="/2018/03/01/Spring-Security-Core-Component/">Spring Security Core Component</a>
-          </li>
-        
-          <li>
-            <a href="/2018/03/01/GIT-常用命令/">GIT 常用命令</a>
           </li>
         
       </ul>
