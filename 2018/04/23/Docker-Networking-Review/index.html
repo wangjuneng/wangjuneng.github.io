@@ -3,14 +3,19 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2018 | Jim Wang&#39;s individual technology blog</title>
+  <title>Docker Networking Review | Jim Wang&#39;s individual technology blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Jim Wang&#39;s individual technology blog">
-<meta property="og:url" content="https://wangjuneng.github.io/archives/2018/index.html">
+  <meta name="description" content="##Linux Networking Constructs Getting ready1sudo apt-get install iproute2 Add dummy interfaces1234567ip link add dummy0 type dummyip address add 172.16.10.129/26 dev dummy0ip link set dummy0 up#In ord">
+<meta name="keywords" content="Docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker Networking Review">
+<meta property="og:url" content="https://wangjuneng.github.io/2018/04/23/Docker-Networking-Review/index.html">
 <meta property="og:site_name" content="Jim Wang&#39;s individual technology blog">
+<meta property="og:description" content="##Linux Networking Constructs Getting ready1sudo apt-get install iproute2 Add dummy interfaces1234567ip link add dummy0 type dummyip address add 172.16.10.129/26 dev dummy0ip link set dummy0 up#In ord">
+<meta property="og:updated_time" content="2018-04-23T15:01:48.069Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Jim Wang&#39;s individual technology blog">
+<meta name="twitter:title" content="Docker Networking Review">
+<meta name="twitter:description" content="##Linux Networking Constructs Getting ready1sudo apt-get install iproute2 Add dummy interfaces1234567ip link add dummy0 type dummyip address add 172.16.10.129/26 dev dummy0ip link set dummy0 up#In ord">
   
     <link rel="alternate" href="/atom.xml" title="Jim Wang&#39;s individual technology blog" type="application/atom+xml">
   
@@ -59,215 +64,70 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2018/04/27/Nodejs-常用组件及问题/" class="archive-article-date">
-  <time datetime="2018-04-27T05:08:50.000Z" itemprop="datePublished">Apr 27</time>
+        <section id="main"><article id="post-Docker-Networking-Review" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/23/Docker-Networking-Review/" class="article-date">
+  <time datetime="2018-04-23T10:44:55.000Z" itemprop="datePublished">2018-04-23</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/cloud/">Cloud</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/04/27/Nodejs-常用组件及问题/">Nodejs 常用组件及问题</a>
+    <h1 class="article-title" itemprop="name">
+      Docker Networking Review
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2018/04/24/docker-kubernetes-java-developers/" class="archive-article-date">
-  <time datetime="2018-04-24T13:04:09.000Z" itemprop="datePublished">Apr 24</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/04/24/docker-kubernetes-java-developers/">docker-kubernetes-java-developers</a>
-    </h1>
-  
+        <p>##Linux Networking Constructs</p>
+<h3 id="Getting-ready"><a href="#Getting-ready" class="headerlink" title="Getting ready"></a>Getting ready</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install iproute2</span><br></pre></td></tr></table></figure>
+<p>Add dummy interfaces<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ip link add dummy0 <span class="built_in">type</span> dummy</span><br><span class="line">ip address add 172.16.10.129/26 dev dummy0</span><br><span class="line">ip link <span class="built_in">set</span> dummy0 up</span><br><span class="line"></span><br><span class="line"><span class="comment">#In order for routing to occur we need to modify a kernel-level parameter to enable IP forwarding</span></span><br><span class="line">sysctl net.ipv4.ip_forward</span><br><span class="line">sysctl -w  net.ipv4.ip_forward=1</span><br></pre></td></tr></table></figure></p>
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2018/04/23/Docker-Networking-Review/" class="archive-article-date">
-  <time datetime="2018-04-23T10:44:55.000Z" itemprop="datePublished">Apr 23</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/04/23/Docker-Networking-Review/">Docker Networking Review</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2018/03/27/Spring-boot-基础配置/" class="archive-article-date">
-  <time datetime="2018-03-27T07:21:18.000Z" itemprop="datePublished">Mar 27</time>
-</a>
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://wangjuneng.github.io/2018/04/23/Docker-Networking-Review/" data-id="cjhbbxx500000l8wr1c82uil9" class="article-share-link">Share</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/27/Spring-boot-基础配置/">Spring boot 基础配置</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2018/03/05/Spring-Security-Core-Services/" class="archive-article-date">
-  <time datetime="2018-03-05T14:28:34.000Z" itemprop="datePublished">Mar 5</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/05/Spring-Security-Core-Services/">Spring Security Core Services</a>
-    </h1>
-  
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/">Docker</a></li></ul>
 
-    </header>
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/04/24/docker-kubernetes-java-developers/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          docker-kubernetes-java-developers
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/03/27/Spring-boot-基础配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Spring boot 基础配置</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2018/03/02/Spring-Security-Authentication/" class="archive-article-date">
-  <time datetime="2018-03-02T14:46:44.000Z" itemprop="datePublished">Mar 2</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/02/Spring-Security-Authentication/">Spring Security Authentication</a>
-    </h1>
-  
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/" class="archive-article-date">
-  <time datetime="2018-03-02T05:01:10.000Z" itemprop="datePublished">Mar 2</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/02/ORA-00020-maximum-number-of-processes-1000-exceeded/">ORA-00020: maximum number of processes (1000) exceeded</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2018/03/01/Spring-Security-Core-Component/" class="archive-article-date">
-  <time datetime="2018-03-01T14:47:30.000Z" itemprop="datePublished">Mar 1</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/01/Spring-Security-Core-Component/">Spring Security Core Component</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2018/03/01/GIT-常用命令/" class="archive-article-date">
-  <time datetime="2018-03-01T05:47:07.000Z" itemprop="datePublished">Mar 1</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/01/GIT-常用命令/">GIT 常用命令</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2018/02/26/使用hexo-github搭建免费个人博客详细教程/" class="archive-article-date">
-  <time datetime="2018-02-26T11:00:23.000Z" itemprop="datePublished">Feb 26</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/02/26/使用hexo-github搭建免费个人博客详细教程/">使用hexo+github搭建免费个人博客详细教程</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-
-  <nav id="page-nav">
-    <span class="page-number current">1</span><a class="page-number" href="/archives/2018/page/2/">2</a><a class="extend next" rel="next" href="/archives/2018/page/2/">__('next') &raquo;</a>
-  </nav>
 </section>
         
           <aside id="sidebar">
